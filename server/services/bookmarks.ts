@@ -5,6 +5,7 @@ import { between, renumber, tooClose } from '../lib/position.ts';
 import { parseQuery } from '../lib/search.ts';
 import { normalizeUrl, parseBookmarkUrl, siteOf } from '../lib/url.ts';
 import { deleteAssets, pruneFavicons } from './assets.ts';
+import { instagramTitle } from './extract.ts';
 import { assertCollection } from './collections.ts';
 import { reindex, unindex } from './search-index.ts';
 import { addTags, pruneTags, removeTags, setBookmarkTags, tagsFor } from './tags.ts';
@@ -302,6 +303,9 @@ export function createBookmark(userId: number, input: CreateInput): Bookmark {
   const shouldFetch = (input.fetch ?? true) && !!url && !input.fileAssetId;
   const t = now();
   const createdAt = input.createdAt && input.createdAt > 0 ? input.createdAt : t;
+  let title = (input.title ?? '').trim().slice(0, 1000);
+  // A tab or import that only knows Instagram's placeholder title: name the page from its URL.
+  if (title === 'Instagram' && url) title = instagramTitle(url) ?? title;
 
   const id = tx(() => {
     const { lastId } = run(
@@ -314,7 +318,7 @@ export function createBookmark(userId: number, input: CreateInput): Bookmark {
       url,
       url ? normalizeUrl(url) : null,
       siteOf(url),
-      (input.title ?? '').trim().slice(0, 1000),
+      title,
       (input.description ?? '').trim().slice(0, 5000),
       note,
       input.coverUrl ?? null,

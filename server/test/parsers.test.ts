@@ -4,7 +4,7 @@ import { describe, test } from 'node:test';
 import { parseQuery } from '../lib/search.ts';
 import { normalizeUrl, parseBookmarkUrl } from '../lib/url.ts';
 import { extractInWorker } from '../services/extract-pool.ts';
-import { discogsMetadata, discogsResource } from '../services/extract.ts';
+import { discogsMetadata, discogsResource, instagramTitle } from '../services/extract.ts';
 import { BlockedError, extractMetadata, isBlocked, safeFetch, safeLookup, sniffImage, titleFromUrl } from '../services/fetcher.ts';
 import { parseCsv, parseImport, parseNetscape, toCsv, type ExportData } from '../services/io.ts';
 
@@ -196,6 +196,18 @@ describe('metadata extraction', () => {
     assert.equal(titleFromUrl('https://news.example.com/item/12345'), 'News.example.com');
     // A stray % isn't a valid escape; this used to throw, leaving the bookmark "pending" forever.
     assert.equal(titleFromUrl('https://example.com/sale-50%-off'), 'Sale 50% off');
+  });
+
+  test('names Instagram pages from their URL', () => {
+    assert.equal(instagramTitle('https://www.instagram.com/natgeo/'), '@natgeo on Instagram');
+    assert.equal(instagramTitle('https://www.instagram.com/p/DA1b2C3dE4f/?igsh=abc'), 'Instagram post');
+    assert.equal(instagramTitle('https://www.instagram.com/reel/DA1b2C3dE4f/'), 'Instagram reel');
+    assert.equal(instagramTitle('https://www.instagram.com/natgeo/reel/DA1b2C3dE4f/'), 'Instagram reel by @natgeo');
+    assert.equal(instagramTitle('https://instagram.com/stories/natgeo/3456789/'), 'Instagram story by @natgeo');
+    assert.equal(instagramTitle('https://www.instagram.com/explore/tags/sourdough/'), '#sourdough on Instagram');
+    assert.equal(instagramTitle('https://www.instagram.com/accounts/login/'), 'Instagram');
+    assert.equal(instagramTitle('https://example.com/natgeo/'), null);
+    assert.equal(titleFromUrl('https://www.instagram.com/natgeo/p/DA1b2C3dE4f/'), 'Instagram post by @natgeo');
   });
 
   test('parses pages in a worker thread with the same results', async () => {

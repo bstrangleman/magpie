@@ -181,6 +181,31 @@ export function discogsMetadata(kind: DiscogsKind, data: DiscogsData): Metadata 
   return { title, description, image, favicon: null, type: 'link', contentHtml: null, contentText: null };
 }
 
+// --- Instagram -----------------------------------------------------------------
+
+const INSTAGRAM_KINDS: Record<string, string> = { p: 'post', reel: 'reel', reels: 'reel', tv: 'video' };
+const INSTAGRAM_PAGES = new Set(['accounts', 'direct', 'explore', 'about', 'developer', 'legal', 'web']);
+
+/**
+ * Instagram serves browsers that aren't signed in a script shell titled just "Instagram", with no
+ * page metadata. This names the page from its URL instead ("/natgeo/" → "@natgeo on Instagram"),
+ * or returns null for other sites.
+ */
+export function instagramTitle(pageUrl: string): string | null {
+  const url = new URL(pageUrl);
+  if (!/(^|\.)instagram\.com$/.test(url.hostname)) return null;
+  const parts = url.pathname.split('/').filter(Boolean);
+  const [first, second, third] = parts;
+  if (!first) return 'Instagram';
+  if (first === 'stories' && second) return `Instagram story by @${second}`;
+  if (first === 'explore' && second === 'tags' && third) return `#${third} on Instagram`;
+  if (INSTAGRAM_KINDS[first] && second) return `Instagram ${INSTAGRAM_KINDS[first]}`;
+  if (INSTAGRAM_PAGES.has(first)) return 'Instagram';
+  // Share links can include the account: "/natgeo/p/DA1b2C3/".
+  if (second && INSTAGRAM_KINDS[second] && third) return `Instagram ${INSTAGRAM_KINDS[second]} by @${first}`;
+  return `@${first} on Instagram`;
+}
+
 export function typeFromMime(mime: string): BookmarkType | null {
   if (mime.startsWith('image/')) return 'image';
   if (mime.startsWith('video/')) return 'video';

@@ -146,6 +146,12 @@ describe('auth', () => {
 });
 
 describe('bookmarks', () => {
+  test("replaces Instagram's placeholder title with one from the URL", async () => {
+    const c = await signedInClient();
+    const b = await c.post('/api/bookmarks', { url: 'https://www.instagram.com/natgeo/', title: 'Instagram' });
+    assert.equal(b.data.title, '@natgeo on Instagram');
+  });
+
   test('create, update, tag, search, list', async () => {
     const c = await signedInClient();
     const col = (await c.post('/api/collections', { name: 'Photography', icon: '📷' })).data;

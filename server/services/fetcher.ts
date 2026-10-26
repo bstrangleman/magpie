@@ -4,7 +4,7 @@ import { Agent, fetch } from 'undici';
 import { config } from '../config.ts';
 import { get, now, run } from '../db/index.ts';
 import { deleteAssets, pruneFavicons, saveAsset } from './assets.ts';
-import { clean, discogsMetadata, discogsResource, type Metadata, typeFromMime } from './extract.ts';
+import { clean, discogsMetadata, discogsResource, instagramTitle, type Metadata, typeFromMime } from './extract.ts';
 import { extractInWorker } from './extract-pool.ts';
 import { reindex } from './search-index.ts';
 
@@ -238,6 +238,8 @@ type PendingRow = { id: number; user_id: number; url: string | null; type: Metad
 
 /** A readable fallback title from the URL ("/the-food-lab-guide" → "The food lab guide"). */
 export function titleFromUrl(input: string): string {
+  const instagram = instagramTitle(input);
+  if (instagram) return instagram;
   const url = new URL(input);
   const slug = safeDecode(url.pathname.split('/').filter(Boolean).pop() ?? '')
     .replace(/\.(html?|php|aspx?)$/i, '')
@@ -308,6 +310,7 @@ export async function processBookmark(id: number) {
     const embed = await oembed(pageUrl);
     if (embed?.title) meta.title = clean(embed.title);
     if (embed?.thumbnail_url) meta.image = embed.thumbnail_url;
+    if (!meta.title || meta.title === 'Instagram') meta.title = instagramTitle(pageUrl) ?? meta.title;
 
     const coverAssetId = meta.image ? await cacheCover(b.user_id, meta.image) : null;
     await cacheFavicon(b.user_id, meta.favicon, pageUrl);

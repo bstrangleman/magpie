@@ -153,4 +153,11 @@ export const migrations: string[] = [
   ) WITHOUT ROWID;
   CREATE INDEX favicons_asset ON favicons(asset_id);
   `,
+
+  // Instagram pages were saved with its placeholder title "Instagram": clear it and fetch them
+  // again, so they get a title from their URL.
+  /* sql */ `
+  UPDATE bookmarks SET title = '', fetch_status = 'pending'
+  WHERE title = 'Instagram' AND (site = 'instagram.com' OR site LIKE '%.instagram.com') AND file_asset_id IS NULL;
+  `,
 ];
