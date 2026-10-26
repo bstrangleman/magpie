@@ -4,6 +4,7 @@ import { describe, test } from 'node:test';
 import { parseQuery } from '../lib/search.ts';
 import { normalizeUrl, parseBookmarkUrl } from '../lib/url.ts';
 import { extractInWorker } from '../services/extract-pool.ts';
+import { discogsMetadata, discogsResource } from '../services/extract.ts';
 import { BlockedError, extractMetadata, isBlocked, safeFetch, safeLookup, sniffImage, titleFromUrl } from '../services/fetcher.ts';
 import { parseCsv, parseImport, parseNetscape, toCsv, type ExportData } from '../services/io.ts';
 
@@ -206,5 +207,48 @@ describe('metadata extraction', () => {
     const m = extractMetadata('<html><head><title>Clip</title></head><body></body></html>', 'https://www.youtube.com/watch?v=1');
     assert.equal(m.type, 'video');
     assert.equal(m.favicon, 'https://www.youtube.com/favicon.ico');
+  });
+
+  test('finds the API resource behind a Discogs page', () => {
+    assert.deepEqual(discogsResource('https://www.discogs.com/release/945406-Various-Nothing-Compares-To-The-Hits-Of-1990'), {
+      kind: 'release',
+      path: 'releases/945406',
+    });
+    assert.equal(discogsResource('https://discogs.com/de/master/23432-Middle-Men-Tales-From-The-Blobe')?.path, 'masters/23432');
+    assert.equal(discogsResource('https://www.discogs.com/artist/1-The-Persuader')?.path, 'artists/1');
+    assert.equal(discogsResource('https://www.discogs.com/label/1')?.path, 'labels/1');
+    assert.equal(discogsResource('https://www.discogs.com/Various-Nothing-Compares/release/945406')?.path, 'releases/945406', 'old-style URL');
+    assert.equal(discogsResource('https://www.discogs.com/search/?q=release'), null);
+    assert.equal(discogsResource('https://example.com/release/945406'), null);
+  });
+
+  test('reads Discogs API data', () => {
+    const release = discogsMetadata('release', {
+      title: 'Split',
+      year: 1990,
+      country: 'Australia',
+      artists: [{ name: 'Middle Men (2)', join: '&' }, { name: 'The Persuader', join: ',' }, { name: 'Various' }],
+      labels: [{ name: 'EMI (3)' }],
+      formats: [{ name: 'CD', descriptions: ['Compilation'] }],
+      images: [
+        { type: 'secondary', uri: 'https://i.discogs.example/back.jpg' },
+        { type: 'primary', uri: 'https://i.discogs.example/front.jpg' },
+      ],
+    });
+    assert.equal(release.title, 'Middle Men & The Persuader, Various – Split');
+    assert.equal(release.description, '1990 · Australia · CD, Compilation · EMI');
+    assert.equal(release.image, 'https://i.discogs.example/front.jpg');
+    assert.equal(release.favicon, null);
+
+    const master = discogsMetadata('master', { title: 'Tales', year: 2005, genres: ['Electronic', 'Jazz'], artists: [{ name: 'X' }] });
+    assert.equal(master.description, '2005 · Electronic, Jazz');
+    assert.equal(master.image, null);
+
+    const artist = discogsMetadata('artist', {
+      name: 'The Persuader (2)',
+      profile: 'Alias of [a=Jesper Dahlbäck][a123]. See [url=https://x.example]his site[/url], [b]Stockholm[/b].',
+    });
+    assert.equal(artist.title, 'The Persuader');
+    assert.equal(artist.description, 'Alias of Jesper Dahlbäck. See his site, Stockholm.');
   });
 });

@@ -27,7 +27,9 @@ export const config = {
   fetchUserAgent:
     env.FETCH_USER_AGENT ??
     `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36 Magpie/${version}`,
-  maxUploadBytes: Number(env.MAX_UPLOAD_MB ?? 50) * 1024 * 1024,
+  /** Discogs pages challenge bots, so their metadata comes from the public API instead. Replaced in tests. */
+  discogsApiUrl: 'https://api.discogs.com',
+  maxUploadBytes:Number(env.MAX_UPLOAD_MB ?? 50) * 1024 * 1024,
   backupRetention: Number(env.BACKUP_RETENTION ?? 14),
   sessionDays: 30,
 };

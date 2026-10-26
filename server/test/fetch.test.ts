@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { after, before, describe, test } from 'node:test';
+import { config } from '../config.ts';
 import { get } from '../db/index.ts';
 import { processBookmark } from '../services/fetcher.ts';
 import { signedInClient, type Client } from './helpers.ts';
@@ -29,6 +30,10 @@ const armSlow = () => {
 const server = http.createServer((req, res) => {
   const path = req.url ?? '/';
   if (path === '/article' || path === '/other') return res.writeHead(200, { 'content-type': 'text/html' }).end(ARTICLE);
+  if (path === '/discogs/releases/945406') {
+    const release = { title: 'Nothing Compares... To The Hits Of 1990', year: 1990, artists: [{ name: 'Various' }], images: [{ type: 'primary', uri: `${base}/cover.png` }] };
+    return res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(release));
+  }
   if (path === '/cover.png') return res.writeHead(200, { 'content-type': 'image/png' }).end(PNG);
   // Served with the wrong type: the icon is recognised by its bytes.
   if (path === '/icon.png') return res.writeHead(200, { 'content-type': 'text/plain' }).end(PNG);
@@ -42,6 +47,7 @@ const server = http.createServer((req, res) => {
 before(async () => {
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  config.discogsApiUrl = `${base}/discogs`;
 });
 after(() => server.close());
 
@@ -78,6 +84,18 @@ describe('fetching metadata', () => {
     await c.post('/api/bookmarks/bulk', { ids: [id, again], action: 'delete' });
     assert.equal(get<{ n: number }>('SELECT COUNT(*) AS n FROM favicons')!.n, 0);
     assert.equal((await c.get(b.favicon)).status, 404);
+  });
+
+  test('Discogs pages are read from its API, not the bot-challenged page', async () => {
+    const c = await signedInClient();
+    const id = await save(c, 'https://www.discogs.com/release/945406-Various-Nothing-Compares-To-The-Hits-Of-1990');
+    await processBookmark(id);
+    const b = (await c.get(`/api/bookmarks/${id}`)).data;
+    assert.equal(b.fetchStatus, 'done');
+    assert.equal(b.title, 'Various – Nothing Compares... To The Hits Of 1990');
+    assert.equal(b.description, '1990');
+    assert.match(b.cover, /^\/api\/assets\/\d+$/);
+    assert.equal(b.favicon, null);
   });
 
   test('a broken link with a stray % in its URL gets a title and stops being pending', async () => {

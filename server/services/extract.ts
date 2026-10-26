@@ -122,6 +122,65 @@ export function extractMetadata(html: string, pageUrl: string): Metadata {
   return { title, description, image, favicon, type, contentHtml, contentText };
 }
 
+// --- Discogs -------------------------------------------------------------------
+
+const DISCOGS_RESOURCES = { release: 'releases', master: 'masters', artist: 'artists', label: 'labels' } as const;
+export type DiscogsKind = keyof typeof DISCOGS_RESOURCES;
+
+export interface DiscogsData {
+  title?: string;
+  name?: string;
+  profile?: string;
+  year?: number;
+  country?: string;
+  artists?: { name: string; join?: string }[];
+  labels?: { name: string }[];
+  formats?: { name: string; descriptions?: string[] }[];
+  genres?: string[];
+  images?: { type: string; uri: string }[];
+}
+
+/** The API resource for a Discogs page ("/release/945406-Various-…" → releases/945406), or null for other pages. */
+export function discogsResource(pageUrl: string): { kind: DiscogsKind; path: string } | null {
+  const url = new URL(pageUrl);
+  if (!/(^|\.)discogs\.com$/.test(url.hostname)) return null;
+  const m = url.pathname.match(/\/(release|master|artist|label)\/(\d+)(?:[-/]|$)/);
+  if (!m) return null;
+  const kind = m[1] as DiscogsKind;
+  return { kind, path: `${DISCOGS_RESOURCES[kind]}/${m[2]}` };
+}
+
+/** "Middle Men (2)" → "Middle Men": Discogs numbers artists and labels that share a name. */
+const discogsName = (name: string) => name.replace(/\s+\(\d+\)$/, '');
+
+/** Profile text without Discogs markup: "[a=Name]" → "Name", "[url=…]text[/url]" → "text", id links dropped. */
+const discogsText = (text: string | undefined) =>
+  text
+    ?.replace(/\[[almr]=([^\]]+)\]/g, '$1')
+    .replace(/\[[almr]\d+\]/g, '')
+    .replace(/\[url=[^\]]*\]|\[\/?(b|i|u|url)\]/g, '');
+
+export function discogsMetadata(kind: DiscogsKind, data: DiscogsData): Metadata {
+  let title: string | null;
+  let description: string | null;
+  if (kind === 'release' || kind === 'master') {
+    const artists = (data.artists ?? [])
+      .map((a, i, all) => discogsName(a.name) + (i === all.length - 1 ? '' : a.join && a.join !== ',' ? ` ${a.join} ` : ', '))
+      .join('');
+    title = clean(artists && data.title ? `${artists} – ${data.title}` : data.title);
+    const format = data.formats?.[0] && [data.formats[0].name, ...(data.formats[0].descriptions ?? [])].join(', ');
+    const label = data.labels?.[0] && discogsName(data.labels[0].name);
+    const details = kind === 'release' ? [data.year, data.country, format, label] : [data.year, data.genres?.join(', ')];
+    description = clean(details.filter(Boolean).join(' · '));
+  } else {
+    title = clean(data.name && discogsName(data.name));
+    description = clean(discogsText(data.profile), 2000);
+  }
+  const image = (data.images?.find((i) => i.type === 'primary') ?? data.images?.[0])?.uri || null;
+  // The site icon sits behind the same bot challenge as the pages.
+  return { title, description, image, favicon: null, type: 'link', contentHtml: null, contentText: null };
+}
+
 export function typeFromMime(mime: string): BookmarkType | null {
   if (mime.startsWith('image/')) return 'image';
   if (mime.startsWith('video/')) return 'video';

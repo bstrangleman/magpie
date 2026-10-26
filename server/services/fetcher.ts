@@ -4,7 +4,7 @@ import { Agent, fetch } from 'undici';
 import { config } from '../config.ts';
 import { get, now, run } from '../db/index.ts';
 import { deleteAssets, pruneFavicons, saveAsset } from './assets.ts';
-import { clean, type Metadata, typeFromMime } from './extract.ts';
+import { clean, discogsMetadata, discogsResource, type Metadata, typeFromMime } from './extract.ts';
 import { extractInWorker } from './extract-pool.ts';
 import { reindex } from './search-index.ts';
 
@@ -176,6 +176,18 @@ async function oembed(pageUrl: string): Promise<{ title?: string; thumbnail_url?
   }
 }
 
+/** Metadata for a Discogs release, master, artist or label from the public API, or null to read the page as usual. */
+async function discogs(pageUrl: string): Promise<Metadata | null> {
+  const resource = discogsResource(pageUrl);
+  if (!resource) return null;
+  try {
+    const res = await safeFetch(`${config.discogsApiUrl}/${resource.path}`, { maxBytes: 2 * 1024 * 1024, accept: 'application/json' });
+    return res.status === 200 && !res.truncated ? discogsMetadata(resource.kind, JSON.parse(res.body.toString('utf8'))) : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Download a preview image and store it locally so covers keep working if the source changes. */
 async function cacheCover(userId: number, imageUrl: string): Promise<number | null> {
   try {
@@ -254,45 +266,51 @@ export async function processBookmark(id: number) {
   const url = b.url;
 
   try {
-    const res = await safeFetch(url, { maxBytes: 5 * 1024 * 1024, accept: 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8' });
-    if (res.status >= 400) {
-      run(
-        `UPDATE bookmarks SET fetch_status = 'failed', http_status = ?, broken = ?, fetched_at = ?,
-           title = CASE WHEN title = '' THEN ? ELSE title END WHERE id = ? AND url = ?`,
-        res.status,
-        res.status === 404 || res.status === 410,
-        now(),
-        titleFromUrl(url),
-        id,
-        url,
-      );
-      reindex([id]);
-      return;
+    let meta = await discogs(url);
+    let pageUrl = url;
+    let status = 200;
+    if (!meta) {
+      const res = await safeFetch(url, { maxBytes: 5 * 1024 * 1024, accept: 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8' });
+      if (res.status >= 400) {
+        run(
+          `UPDATE bookmarks SET fetch_status = 'failed', http_status = ?, broken = ?, fetched_at = ?,
+             title = CASE WHEN title = '' THEN ? ELSE title END WHERE id = ? AND url = ?`,
+          res.status,
+          res.status === 404 || res.status === 410,
+          now(),
+          titleFromUrl(url),
+          id,
+          url,
+        );
+        reindex([id]);
+        return;
+      }
+
+      pageUrl = res.url;
+      status = res.status;
+      const mime = res.contentType.split(';')[0]!.trim();
+      if (!mime || mime.includes('html') || mime.includes('xml')) {
+        meta = await extractInWorker(decode(res.body, res.contentType), res.url);
+      } else {
+        const fileName = safeDecode(new URL(res.url).pathname.split('/').pop() ?? '');
+        meta = {
+          title: fileName || null,
+          description: null,
+          image: mime.startsWith('image/') ? res.url : null,
+          favicon: new URL('/favicon.ico', res.url).href,
+          type: typeFromMime(mime) ?? 'link',
+          contentHtml: null,
+          contentText: null,
+        };
+      }
     }
 
-    const mime = res.contentType.split(';')[0]!.trim();
-    let meta: Metadata;
-    if (!mime || mime.includes('html') || mime.includes('xml')) {
-      meta = await extractInWorker(decode(res.body, res.contentType), res.url);
-    } else {
-      const fileName = safeDecode(new URL(res.url).pathname.split('/').pop() ?? '');
-      meta = {
-        title: fileName || null,
-        description: null,
-        image: mime.startsWith('image/') ? res.url : null,
-        favicon: new URL('/favicon.ico', res.url).href,
-        type: typeFromMime(mime) ?? 'link',
-        contentHtml: null,
-        contentText: null,
-      };
-    }
-
-    const embed = await oembed(res.url);
+    const embed = await oembed(pageUrl);
     if (embed?.title) meta.title = clean(embed.title);
     if (embed?.thumbnail_url) meta.image = embed.thumbnail_url;
 
     const coverAssetId = meta.image ? await cacheCover(b.user_id, meta.image) : null;
-    await cacheFavicon(b.user_id, meta.favicon, res.url);
+    await cacheFavicon(b.user_id, meta.favicon, pageUrl);
 
     const { changes } = run(
       `UPDATE bookmarks SET
@@ -310,7 +328,7 @@ export async function processBookmark(id: number) {
       meta.type,
       meta.contentHtml,
       meta.contentText,
-      res.status,
+      status,
       now(),
       id,
       url,
