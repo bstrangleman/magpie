@@ -1,0 +1,18 @@
+services:
+  magpie:
+    build: .
+    image: magpie:latest
+    container_name: magpie
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/data
+    environment:
+      # Block new sign-ups once you've created your account.
+      DISABLE_SIGNUPS: "false"
+      # Allow fetching titles/previews for links on your LAN (e.g. http://tower.local:8080).
+      FETCH_ALLOW_PRIVATE_NETWORKS: "false"
+      # User and group that own ./data (Unraid: 99 and 100).
+      PUID: "1000"
+      PGID: "1000"

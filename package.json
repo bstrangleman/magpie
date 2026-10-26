@@ -1,0 +1,52 @@
+{
+  "name": "magpie",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A minimal, self-hosted bookmark manager",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c blue,magenta \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "PORT=3000 node --watch-path=server --watch-path=shared server/index.ts",
+    "dev:web": "vite",
+    "dev:extension": "vite --config extension/vite.config.ts",
+    "build": "vite build && npm run build:extension",
+    "build:extension": "vite build --config extension/vite.config.ts && vite build --config extension/vite.config.ts --mode background && node scripts/package-extension.ts",
+    "start": "NODE_ENV=production node server/index.ts",
+    "docker:unraid": "mkdir -p dist && docker buildx build --platform linux/amd64 -t ghcr.io/bstrangleman/magpie:latest -o type=docker,dest=- . | gzip > dist/magpie-docker-amd64.tar.gz",
+    "icons": "node scripts/icons.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p web/tsconfig.json && tsc --noEmit -p extension/tsconfig.json",
+    "test": "node --test server/test/*.test.ts extension/test/*.test.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.5",
+    "@mozilla/readability": "^0.6.0",
+    "hono": "^4.13.14",
+    "linkedom": "^0.18.14",
+    "sanitize-html": "^2.18.1",
+    "undici": "^8.12.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/react-query": "^5.104.5",
+    "@types/chrome": "^0.3.6",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/sanitize-html": "^2.16.2",
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.6",
+    "dompurify": "^3.4.17",
+    "lucide-react": "^1.61.0",
+    "marked": "^18.1.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router": "^8.5.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}

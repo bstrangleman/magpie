@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Magpie</Name>
+  <Repository>ghcr.io/bstrangleman/magpie:latest</Repository>
+  <Registry>https://github.com/bstrangleman/magpie/pkgs/container/magpie</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/bstrangleman/magpie/issues</Support>
+  <Project>https://github.com/bstrangleman/magpie</Project>
+  <Overview>A minimal, self-hosted bookmark manager: nested collections, tags, full-text search, a reader view, import/export, daily backups and a browser extension. One Node process and one SQLite file. Open the Web UI and create your account; the first account is the administrator. Then set "Disable sign-ups" to true.</Overview>
+  <Category>Productivity: Tools:</Category>
+  <WebUI>http://[IP]:[PORT:3000]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/bstrangleman/magpie/master/unraid/magpie.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/bstrangleman/magpie/master/extension/public/icons/128.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="Web UI port" Target="3000" Default="3000" Mode="tcp" Description="Port for the web app, API and browser extension. Change the host port if 3000 is taken (Grafana uses it too)." Type="Port" Display="always" Required="true" Mask="false">3000</Config>
+  <Config Name="Data" Target="/data" Default="/mnt/user/appdata/magpie" Mode="rw" Description="Database (magpie.db), uploaded files, cached previews and backups. SQLite is safest off Unraid's /mnt/user FUSE layer: this default is fine when appdata is an exclusive share (Unraid 6.12+); otherwise use the pool path directly, e.g. /mnt/cache/appdata/magpie." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/magpie</Config>
+  <Config Name="Disable sign-ups" Target="DISABLE_SIGNUPS" Default="false|true" Mode="" Description="Set to true once you've created your account, to block new ones." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
+  <Config Name="Fetch LAN links" Target="FETCH_ALLOW_PRIVATE_NETWORKS" Default="false|true" Mode="" Description="Allow fetching titles and previews for links on your local network (e.g. http://tower.local:8080). Off by default so the server can't be used to probe your network; such links are still saved, just without metadata." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="User ID that owns the data folder. 99 is Unraid's 'nobody'." Type="Variable" Display="advanced" Required="true" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Group ID that owns the data folder. 100 is Unraid's 'users'." Type="Variable" Display="advanced" Required="true" Mask="false">100</Config>
+  <Config Name="UMASK" Target="UMASK" Default="022" Mode="" Description="Permissions mask for new files in the data folder." Type="Variable" Display="advanced" Required="false" Mask="false">022</Config>
+  <Config Name="Max upload size (MB)" Target="MAX_UPLOAD_MB" Default="50" Mode="" Description="Largest file you can upload." Type="Variable" Display="advanced" Required="false" Mask="false">50</Config>
+  <Config Name="Backups to keep" Target="BACKUP_RETENTION" Default="14" Mode="" Description="Automatic daily backups kept per user." Type="Variable" Display="advanced" Required="false" Mask="false">14</Config>
+</Container>

@@ -1,0 +1,279 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-sidebar: var(--sidebar);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-hover: var(--hover);
+  --color-field: var(--field);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: color-mix(in srgb, var(--accent) 13%, transparent);
+  --color-danger: var(--danger);
+}
+
+/* ---- Themes ---------------------------------------------------------------- */
+
+:root,
+[data-theme='light'],
+[data-theme='dark-sidebar'] {
+  color-scheme: light;
+  --surface: #ffffff;
+  --elevated: #ffffff;
+  --sidebar: #f5f5f4;
+  --ink: #1f1f1f;
+  --ink-2: #6b6b6b;
+  --ink-3: #9d9d9d;
+  --line: #ebeae8;
+  --hover: rgb(0 0 0 / 0.045);
+  --field: #efefee;
+  --accent: #3a7bd5;
+  --accent-ink: #ffffff;
+  --danger: #d6453d;
+  --shadow: 0 10px 30px rgb(0 0 0 / 0.12), 0 1px 3px rgb(0 0 0 / 0.08);
+
+  /* Charts (statistics page). Categorical slots in fixed order, validated for CVD
+     separation against this surface; heatmap is a one-hue ordinal ramp. */
+  --viz-1: #2a78d6;
+  --viz-2: #eb6834;
+  --viz-3: #1baf7a;
+  --viz-4: #eda100;
+  --viz-5: #e87ba4;
+  --viz-6: #008300;
+  --viz-7: #6250d6;
+  --viz-quiet: #cfcec8;
+  --viz-grid: #ecebe8;
+  --viz-heat-0: #eeedeb;
+  --viz-heat-1: #86b6ef;
+  --viz-heat-2: #3987e5;
+  --viz-heat-3: #1c5cab;
+  --viz-heat-4: #0d366b;
+}
+
+[data-theme='dark'],
+[data-theme='dark-sidebar'] .sidebar-scope {
+  color-scheme: dark;
+  --surface: #1c1c1e;
+  --elevated: #2a2a2d;
+  --sidebar: #161617;
+  --ink: #ececec;
+  --ink-2: #a3a3a8;
+  --ink-3: #6e6e73;
+  --line: #2e2e31;
+  --hover: rgb(255 255 255 / 0.06);
+  --field: #2a2a2d;
+  --accent: #4a8ae6;
+  --danger: #ef6a62;
+  --shadow: 0 10px 30px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.4);
+
+  --viz-1: #3987e5;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-4: #c98500;
+  --viz-5: #d55181;
+  --viz-6: #008300;
+  --viz-7: #9085e9;
+  --viz-quiet: #48484c;
+  --viz-grid: #2c2c2f;
+  --viz-heat-0: #29292c;
+  --viz-heat-1: #184f95;
+  --viz-heat-2: #2a78d6;
+  --viz-heat-3: #6da7ec;
+  --viz-heat-4: #b7d3f6;
+}
+
+[data-theme='dark-sidebar'] .sidebar-scope {
+  --sidebar: #1b1b1c;
+  background: var(--sidebar);
+  color: var(--ink);
+}
+
+[data-theme='sepia'] {
+  color-scheme: light;
+  --surface: #faf4e8;
+  --elevated: #fffaf0;
+  --sidebar: #f1e8d6;
+  --ink: #3a2f22;
+  --ink-2: #7b6a54;
+  --ink-3: #a8967c;
+  --line: #e6dbc5;
+  --hover: rgb(90 60 20 / 0.06);
+  --field: #ece2cd;
+  --accent: #b5762f;
+  --accent-ink: #ffffff;
+  --danger: #c0473a;
+  --shadow: 0 10px 30px rgb(80 50 10 / 0.15), 0 1px 3px rgb(80 50 10 / 0.1);
+
+  --viz-quiet: #d8ccb2;
+  --viz-grid: #e9dfcb;
+  --viz-heat-0: #efe6d4;
+  --viz-heat-1: #6da7ec;
+  --viz-heat-2: #2a78d6;
+  --viz-heat-3: #1c5cab;
+  --viz-heat-4: #0d366b;
+}
+
+/* ---- Base ------------------------------------------------------------------ */
+
+html {
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+html.large-font {
+  font-size: 17px;
+}
+
+body {
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  overscroll-behavior: none;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ink) 18%, transparent) transparent;
+}
+
+button {
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  outline-offset: 1px;
+}
+
+.shadow-pop {
+  box-shadow: var(--shadow);
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+.animate-pop {
+  animation: pop-in 120ms ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.animate-fade {
+  animation: fade-in 150ms ease-out;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+.animate-slide {
+  animation: slide-in 160ms ease-out;
+}
+
+/* ---- Reader view ------------------------------------------------------------ */
+
+.reader {
+  font-size: 1.07rem;
+  line-height: 1.7;
+  overflow-wrap: break-word;
+}
+.reader > * + * {
+  margin-top: 1em;
+}
+.reader h1,
+.reader h2,
+.reader h3,
+.reader h4 {
+  font-weight: 650;
+  line-height: 1.3;
+  margin-top: 1.6em;
+}
+.reader h1 {
+  font-size: 1.6em;
+}
+.reader h2 {
+  font-size: 1.35em;
+}
+.reader h3 {
+  font-size: 1.15em;
+}
+.reader a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-underline-offset: 2px;
+}
+.reader img,
+.reader video {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin-inline: auto;
+}
+.reader figcaption {
+  font-size: 0.85em;
+  color: var(--ink-2);
+  text-align: center;
+  margin-top: 0.4em;
+}
+.reader ul {
+  list-style: disc;
+  padding-left: 1.4em;
+}
+.reader ol {
+  list-style: decimal;
+  padding-left: 1.4em;
+}
+.reader li + li {
+  margin-top: 0.3em;
+}
+.reader blockquote {
+  border-left: 3px solid var(--line);
+  padding-left: 1em;
+  color: var(--ink-2);
+}
+.reader pre {
+  background: var(--field);
+  padding: 0.9em 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+.reader code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+}
+.reader :not(pre) > code {
+  background: var(--field);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.reader table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+.reader th,
+.reader td {
+  border: 1px solid var(--line);
+  padding: 0.4em 0.6em;
+  text-align: left;
+}
+.reader hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+}

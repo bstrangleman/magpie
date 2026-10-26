@@ -1,0 +1,8 @@
+/* Same design tokens and themes as the web app. */
+@import '../../web/src/index.css';
+@source '.';
+@source '../../web/src/components';
+
+html {
+  font-size: 14px;
+}

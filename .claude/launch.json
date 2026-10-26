@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "magpie-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "magpie-extension-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:extension"],
+      "port": 5174
+    }
+  ]
+}
