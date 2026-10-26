@@ -149,7 +149,9 @@ export function Floating({
       ref={ref}
       style={pos ?? { left: -9999, top: -9999 }}
       className={cn(
-        'shadow-pop animate-pop fixed z-50 max-h-[min(70vh,560px)] min-w-44 overflow-y-auto rounded-lg border border-line bg-elevated py-1 text-sm text-ink',
+        // A column, so content that can shrink (min-h-0, like the collection list) fits the height
+        // limit and scrolls itself, instead of the panel scrolling around it.
+        'shadow-pop animate-pop fixed z-50 flex max-h-[min(70vh,560px)] min-w-44 flex-col overflow-y-auto rounded-lg border border-line bg-elevated py-1 text-sm text-ink',
         className,
       )}
       onContextMenu={(e) => e.preventDefault()}

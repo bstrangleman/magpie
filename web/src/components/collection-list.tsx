@@ -51,8 +51,9 @@ export function CollectionList({ sidebar, value, onPick, exclude, allowUnsorted 
   const groups = useMemo(() => (sidebar ? flattenTrees(sidebar.groups, sidebar.collections) : []), [sidebar]);
   const f = filter.trim().toLowerCase();
   return (
-    <div className="w-72">
-      <div className="relative px-2 pt-1 pb-1.5">
+    // Shrinks to fit a short popover (min-h-0), so only the list below scrolls.
+    <div className="flex min-h-0 w-72 flex-col">
+      <div className="relative shrink-0 px-2 pt-1 pb-1.5">
         <Search size={14} className="absolute top-3 left-4 text-ink-3" />
         <input
           autoFocus
@@ -62,7 +63,7 @@ export function CollectionList({ sidebar, value, onPick, exclude, allowUnsorted 
           className="w-full rounded-md bg-field py-1.5 pr-2 pl-7 text-sm outline-none placeholder:text-ink-3"
         />
       </div>
-      <div className={cn('overflow-y-auto', listClassName)}>
+      <div className={cn('min-h-0 overflow-y-auto', listClassName)}>
         {allowUnsorted && !f && (
           <PickerRow selected={value === null} onClick={() => onPick(null)} depth={0}>
             <UnsortedIcon /> Unsorted
