@@ -8,7 +8,7 @@ It runs as **one Node process with one SQLite file**. There's no separate search
 
 - **Bookmarks, notes and files.** Save links, Markdown notes, or upload images, PDFs, audio and video.
 - **Automatic metadata.** Each link's title, description, preview image and favicon are fetched in the background. A clean reader view of the article text is also saved, and that text is searchable.
-- **Collections.** Unlimited nesting, emoji icons and colours, grouped into sidebar sections such as "My Collections" or "Side Hustles". Drag to reorder or nest them.
+- **Collections.** Unlimited nesting, icons from the [Phosphor](https://phosphoricons.com) set (search them by name) and colours, grouped into sidebar sections such as "My Collections" or "Side Hustles". Drag to reorder or nest them.
 - **Tags.** Autocomplete, rename/merge, and drop bookmarks onto a tag to apply it.
 - **Filters.** Favorites, notes, links, articles, videos, images, audio, documents, broken links, duplicates, and bookmarks without tags.
 - **Full-text search.** Searches title, description, notes, URL, tags and page text, with operators:
@@ -158,7 +158,7 @@ Failed sign-ins are limited to 10 per account and 50 per client address every 15
 | Search         | SQLite **FTS5** (porter stemming, prefix matching, bm25 ranking with title > tags > description/notes > URL > page text), so no separate search server is needed. |
 | Metadata       | `fetch` (undici) with SSRF checks on every redirect and at connect time (so DNS rebinding can't slip past), Open Graph/Twitter tags, oEmbed for YouTube/Vimeo, and Mozilla Readability + `sanitize-html` for the reader view, run in a worker thread. Covers and site icons are cached locally. |
 | Background jobs | An in-process queue. Pending fetches are stored as `fetch_status = 'pending'`, so they resume after a restart.                     |
-| Web client     | React, Vite, TanStack Query, React Router, Tailwind CSS and Lucide icons                                                            |
+| Web client     | React, Vite, TanStack Query, React Router, Tailwind CSS and Lucide icons. Collection icons are [Phosphor](https://phosphoricons.com) (MIT), stored as `ph:<name>`; the set loads as one lazily loaded chunk |
 
 ### Data model
 

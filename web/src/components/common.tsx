@@ -1,11 +1,26 @@
 import { Folder, Globe, Inbox, Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import type { Collection } from '../../../shared/types.ts';
+import { useMemo, useState, type CSSProperties } from 'react';
+import { phosphorName, type Collection } from '../../../shared/types.ts';
 import { useSidebar } from '../lib/queries.ts';
+import { usePhosphor } from '../lib/phosphor.ts';
 import { cn, flattenTrees } from '../lib/utils.ts';
 import { TagField } from './TagField.tsx';
 
+/** A Phosphor icon by name, drawn in the current text colour. Blank (same size) until the set has loaded. */
+export function PhosphorGlyph({ name, size = 18, className, style }: { name: string; size?: number; className?: string; style?: CSSProperties }) {
+  const icon = usePhosphor()?.get(name);
+  return (
+    <svg viewBox="0 0 256 256" width={size} height={size} fill="currentColor" aria-hidden className={cn('shrink-0', className)} style={style}>
+      {icon && <path d={icon.d} />}
+    </svg>
+  );
+}
+
 export function CollectionIcon({ collection, size = 18 }: { collection: Pick<Collection, 'icon' | 'color'>; size?: number }) {
+  const phosphor = phosphorName(collection.icon);
+  if (phosphor) {
+    return <PhosphorGlyph name={phosphor} size={size} className="text-ink-2" style={collection.color ? { color: collection.color } : undefined} />;
+  }
   if (collection.icon) {
     return (
       <span className="inline-flex shrink-0 items-center justify-center leading-none" style={{ width: size, height: size, fontSize: size * 0.88 }}>

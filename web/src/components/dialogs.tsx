@@ -1,13 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, CircleAlert, Upload } from 'lucide-react';
-import { useRef, useState, type FormEvent, type ReactNode } from 'react';
-import type { Bookmark, Collection } from '../../../shared/types.ts';
+import { ChevronDown, CircleAlert, Search, Upload } from 'lucide-react';
+import { useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { PHOSPHOR_PREFIX, phosphorName, type Bookmark, type Collection } from '../../../shared/types.ts';
 import { api, errorMessage } from '../lib/api.ts';
+import { searchPhosphor, usePhosphor } from '../lib/phosphor.ts';
 import { qk, useCollections, useRefresh } from '../lib/queries.ts';
 import { cn, formatBytes } from '../lib/utils.ts';
 import { CollectionIcon, CollectionPicker, TagInput } from './common.tsx';
 import { toast } from './toast.tsx';
-import { AutoTextarea, Button, ErrorText, Field, Input, Modal, Popover } from './ui.tsx';
+import { AutoTextarea, Button, ErrorText, Field, Input, Modal, Popover, Spinner } from './ui.tsx';
 import { useUI } from './ui-context.tsx';
 
 /** Button that opens a collection picker. */
@@ -301,10 +302,90 @@ export function UploadDialog({ initialFiles = [] }: { initialFiles?: File[] }) {
   );
 }
 
-const EMOJI = (
-  '📁 📂 🗂️ 📚 📖 📝 📌 📎 🔖 🏷️ 💡 ⭐ ❤️ 🔥 ✨ 🎯 🚀 💻 🖥️ 📱 ⌨️ 🛠️ ⚙️ 🧪 🔬 🤖 🧠 🎨 🖌️ 📷 🎬 📺 🎵 🎧 🎮 🕹️ ' +
-  '🏀 ⚽ 🏈 🎾 🏃 🧘 💪 🩺 🍳 🍔 🍕 ☕ 🍷 🛒 🛍️ 💰 💵 📈 🏦 🏠 🌳 🌱 🐶 🐱 ✈️ 🌍 🗺️ 🏖️ ⛰️ 🚗 📰 💼 🏢 🎓 🧾 🧩 🔒 🔑 💬 📣 🎁 👶 🧬 🗳️ 📦 💾'
+/** Common choices, shown first; the rest of the Phosphor set follows A–Z. */
+const SUGGESTED_ICONS = (
+  'folder folder-star bookmark-simple books book-open notebook note push-pin star heart lightbulb fire sparkle target ' +
+  'rocket-launch code laptop device-mobile wrench gear flask robot brain palette paint-brush camera film-slate television ' +
+  'music-notes headphones game-controller basketball barbell heartbeat cooking-pot hamburger coffee wine shopping-cart ' +
+  'shopping-bag money chart-line-up bank house tree plant dog cat airplane globe-hemisphere-west map-trifold umbrella ' +
+  'mountains car newspaper briefcase buildings graduation-cap receipt puzzle-piece lock key chat-circle megaphone gift ' +
+  'baby dna package floppy-disk'
 ).split(' ');
+
+const iconCell = (selected: boolean) =>
+  cn('flex aspect-square items-center justify-center rounded text-ink-2 hover:bg-hover hover:text-ink', selected && 'bg-accent-soft text-ink ring-1 ring-accent');
+
+/** Pick a collection icon: the default folder, or any Phosphor icon, searchable by name and tags. */
+function IconPicker({ value, color, onChange }: { value: string | null; color: string | null; onChange: (icon: string | null) => void }) {
+  const icons = usePhosphor();
+  const [query, setQuery] = useState('');
+  const searching = !!query.trim();
+  const results = useMemo(() => {
+    if (!icons) return [];
+    if (searching) return searchPhosphor(icons.values(), query);
+    const first = SUGGESTED_ICONS.flatMap((name) => icons.get(name) ?? []);
+    return [...first, ...[...icons.values()].filter((icon) => !SUGGESTED_ICONS.includes(icon.name))];
+  }, [icons, query, searching]);
+  // Collections made before Phosphor icons (or imported) may have an emoji: keep it selectable.
+  const emoji = value && !phosphorName(value) ? value : null;
+  const selected = phosphorName(value);
+
+  return (
+    <div className="overflow-hidden rounded-md border border-line">
+      <label className="flex items-center gap-2 border-b border-line px-2.5">
+        <Search size={14} className="shrink-0 text-ink-3" />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            // Enter picks the best match instead of submitting the form.
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+            if (searching && results[0]) onChange(PHOSPHOR_PREFIX + results[0].name);
+          }}
+          placeholder={icons ? `Search ${icons.size.toLocaleString()} icons by name` : 'Search icons by name'}
+          aria-label="Search icons"
+          className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-3"
+        />
+      </label>
+      {/* A fixed height, so the dialog doesn't jump about as results narrow. */}
+      <div className="grid h-44 auto-rows-min grid-cols-10 gap-0.5 overflow-y-auto p-1">
+        {!searching && (
+          <button type="button" title="Default folder" aria-label="Default folder" onClick={() => onChange(null)} className={iconCell(!value)}>
+            <CollectionIcon collection={{ icon: null, color }} size={17} />
+          </button>
+        )}
+        {!searching && emoji && (
+          <button type="button" title="Current emoji" onClick={() => onChange(emoji)} className={cn(iconCell(true), 'text-lg')}>
+            {emoji}
+          </button>
+        )}
+        {results.map((icon) => (
+          <button
+            type="button"
+            key={icon.name}
+            title={icon.name}
+            aria-label={icon.name}
+            aria-pressed={selected === icon.name}
+            onClick={() => onChange(PHOSPHOR_PREFIX + icon.name)}
+            className={iconCell(selected === icon.name)}
+          >
+            <svg viewBox="0 0 256 256" width={18} height={18} fill="currentColor" aria-hidden>
+              <path d={icon.d} />
+            </svg>
+          </button>
+        ))}
+        {!icons && (
+          <div className="col-span-full flex justify-center py-4">
+            <Spinner />
+          </div>
+        )}
+        {icons && searching && !results.length && <p className="col-span-full px-2 py-3 text-sm text-ink-3">No icons match “{query.trim()}”.</p>}
+      </div>
+    </div>
+  );
+}
 
 export const COLORS = ['#64748b', '#3a7bd5', '#0ea5e9', '#14b8a6', '#22a35a', '#84cc16', '#d4a017', '#f97316', '#e5484d', '#ec4899', '#a855f7', '#8b5e3c'];
 
@@ -365,28 +446,9 @@ export function CollectionDialog({
           <Input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Collection name" />
         </div>
         <Field label="Icon">
-          <div className="grid max-h-36 grid-cols-12 gap-0.5 overflow-y-auto rounded-md border border-line p-1">
-            <button
-              type="button"
-              title="Default folder"
-              onClick={() => setIcon(null)}
-              className={cn('flex aspect-square items-center justify-center rounded hover:bg-hover', !icon && 'bg-accent-soft ring-1 ring-accent')}
-            >
-              <CollectionIcon collection={{ icon: null, color }} size={17} />
-            </button>
-            {EMOJI.map((e) => (
-              <button
-                type="button"
-                key={e}
-                onClick={() => setIcon(e)}
-                className={cn('flex aspect-square items-center justify-center rounded text-lg hover:bg-hover', icon === e && 'bg-accent-soft ring-1 ring-accent')}
-              >
-                {e}
-              </button>
-            ))}
-          </div>
+          <IconPicker value={icon} color={color} onChange={setIcon} />
         </Field>
-        <Field label="Colour" hint="Tints the folder icon and the accent colour while you're in this collection.">
+        <Field label="Colour" hint="Tints the icon, and the accent colour while you're in this collection.">
           <div className="flex flex-wrap gap-1.5">
             <Swatch selected={!color} onClick={() => setColor(null)} title="Default">
               <span className="size-full rounded-full border border-line bg-[linear-gradient(135deg,transparent_45%,var(--danger)_45%,var(--danger)_55%,transparent_55%)]" />

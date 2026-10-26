@@ -110,6 +110,12 @@ export interface BookmarkPage {
   nextOffset: number | null;
 }
 
+// A collection's icon is an emoji, or a Phosphor icon (phosphoricons.com) stored as "ph:<name>", e.g. "ph:camera".
+export const PHOSPHOR_PREFIX = 'ph:';
+
+/** The Phosphor icon name in a stored icon, or null for an emoji (or no icon). */
+export const phosphorName = (icon: string | null | undefined) => (icon?.startsWith(PHOSPHOR_PREFIX) ? icon.slice(PHOSPHOR_PREFIX.length) : null);
+
 export interface Collection {
   id: number;
   name: string;

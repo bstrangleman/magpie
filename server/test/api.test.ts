@@ -346,6 +346,16 @@ describe('collections', () => {
     assert.equal((await c.del(`/api/groups/${groups[0].id}`)).status, 400, "can't delete the last group");
   });
 
+  test('icons are an emoji or a Phosphor icon name', async () => {
+    const c = await signedInClient();
+    const col = (await c.post('/api/collections', { name: 'Photos', icon: 'ph:camera' })).data;
+    assert.equal(col.icon, 'ph:camera');
+    assert.equal((await c.patch(`/api/collections/${col.id}`, { icon: 'ph:arrows-counter-clockwise' })).data.icon, 'ph:arrows-counter-clockwise');
+    assert.equal((await c.patch(`/api/collections/${col.id}`, { icon: '🧑‍🍳' })).data.icon, '🧑‍🍳', 'emoji still work');
+    assert.equal((await c.patch(`/api/collections/${col.id}`, { icon: 'ph:Not A Name' })).status, 400);
+    assert.equal((await c.post('/api/collections', { name: 'Bad', icon: 'ph:../x' })).status, 400);
+  });
+
   test('tags rename and merge', async () => {
     const c = await signedInClient();
     await c.post('/api/bookmarks', { url: 'https://one.example', tags: ['recipes'] });

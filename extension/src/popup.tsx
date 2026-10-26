@@ -3,7 +3,7 @@ import './styles.css';
 import { Check, CircleAlert, ExternalLink, Heart, LoaderCircle, Settings, Trash2 } from 'lucide-react';
 import { StrictMode, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import type { Bookmark, Sidebar } from '../../shared/types.ts';
+import { phosphorName, type Bookmark, type Sidebar } from '../../shared/types.ts';
 import { TagField } from '../../web/src/components/TagField.tsx';
 import { AutoTextarea, Button, IconButton, inputClass } from '../../web/src/components/ui.tsx';
 import { cn, flattenTrees } from '../../web/src/lib/utils.ts';
@@ -314,7 +314,7 @@ function Editor({
                 {items.map(({ collection: c, depth }) => (
                   <option key={c.id} value={c.id}>
                     {' '.repeat(depth)}
-                    {c.icon ?? '📁'} {c.name}
+                    {c.icon && !phosphorName(c.icon) ? c.icon : '📁'} {c.name}
                   </option>
                 ))}
               </optgroup>

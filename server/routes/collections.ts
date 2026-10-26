@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import type { Sidebar } from '../../shared/types.ts';
+import { PHOSPHOR_PREFIX, type Sidebar } from '../../shared/types.ts';
 import type { AppEnv } from '../lib/auth.ts';
 import { intParam, parse } from '../lib/http.ts';
 import { getCounts } from '../services/bookmarks.ts';
@@ -19,7 +19,12 @@ import { deleteTag, listTags, renameTag } from '../services/tags.ts';
 
 const id = z.number().int().positive();
 const color = z.string().regex(/^#[0-9a-f]{6}$/i, 'Invalid colour').nullable();
-const icon = z.string().max(32).nullable();
+// An emoji, or a Phosphor icon name such as "ph:camera".
+const icon = z
+  .string()
+  .max(64)
+  .refine((v) => !v.startsWith(PHOSPHOR_PREFIX) || /^ph:[a-z0-9]+(-[a-z0-9]+)*$/.test(v), 'Invalid icon name')
+  .nullable();
 
 export const collectionRoutes = new Hono<AppEnv>()
   .get('/sidebar', (c) => {
