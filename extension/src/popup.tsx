@@ -1,12 +1,13 @@
 import './dev-shim.ts';
 import './styles.css';
-import { Check, CircleAlert, ExternalLink, Heart, LoaderCircle, Settings, Trash2 } from 'lucide-react';
+import { Check, ChevronDown, CircleAlert, ExternalLink, Heart, LoaderCircle, Settings, Trash2 } from 'lucide-react';
 import { StrictMode, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { phosphorName, type Bookmark, type Sidebar } from '../../shared/types.ts';
+import type { Bookmark, Sidebar } from '../../shared/types.ts';
+import { CollectionIcon, CollectionList, UnsortedIcon } from '../../web/src/components/collection-list.tsx';
 import { TagField } from '../../web/src/components/TagField.tsx';
-import { AutoTextarea, Button, IconButton, inputClass } from '../../web/src/components/ui.tsx';
-import { cn, flattenTrees } from '../../web/src/lib/utils.ts';
+import { AutoTextarea, Button, IconButton, inputClass, Popover } from '../../web/src/components/ui.tsx';
+import { cn } from '../../web/src/lib/utils.ts';
 import { ApiError, client, getConnection, type Connection } from './api.ts';
 import type { BadgeMessage } from './background.ts';
 import { ext } from './browser.ts';
@@ -209,7 +210,7 @@ function Editor({
   const [note, setNote] = useState(bookmark.note);
   const [saving, setSaving] = useState<'idle' | 'saving' | 'error'>('idle');
   const [error, setError] = useState('');
-  const groups = useMemo(() => flattenTrees(sidebar.groups, sidebar.collections), [sidebar]);
+  const current = sidebar.collections.find((c) => c.id === b.collectionId);
 
   // Text edits are batched and sent shortly after typing stops — or immediately if the popup
   // closes mid-edit (keepalive lets that last request outlive the popup).
@@ -301,26 +302,31 @@ function Editor({
           aria-label="Title"
           className="max-h-24 font-semibold"
         />
-        <label className="block">
+        <div>
           <span className="mb-1 block text-[0.75rem] font-medium text-ink-2">Collection</span>
-          <select
-            value={b.collectionId ?? ''}
-            onChange={(e) => send({ collectionId: e.target.value ? Number(e.target.value) : null })}
-            className={cn(inputClass, 'w-full')}
+          {/* The web app's picker rather than a <select>, which can't show collection icons. */}
+          <Popover
+            trigger={(p) => (
+              <button type="button" {...p} className={cn(inputClass, 'flex w-full items-center gap-2 text-left')}>
+                {current ? <CollectionIcon collection={current} size={16} /> : <UnsortedIcon size={16} />}
+                <span className="flex-1 truncate">{current?.name ?? 'Unsorted'}</span>
+                <ChevronDown size={14} className="shrink-0 text-ink-3" />
+              </button>
+            )}
           >
-            <option value="">📥 Unsorted</option>
-            {groups.map(({ group, items }) => (
-              <optgroup key={group.id} label={group.name}>
-                {items.map(({ collection: c, depth }) => (
-                  <option key={c.id} value={c.id}>
-                    {' '.repeat(depth)}
-                    {c.icon && !phosphorName(c.icon) ? c.icon : '📁'} {c.name}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
+            {(close) => (
+              <CollectionList
+                sidebar={sidebar}
+                value={b.collectionId}
+                listClassName="max-h-64"
+                onPick={(collectionId) => {
+                  close();
+                  if (collectionId !== b.collectionId) send({ collectionId });
+                }}
+              />
+            )}
+          </Popover>
+        </div>
         <div>
           <span className="mb-1 block text-[0.75rem] font-medium text-ink-2">Tags</span>
           <TagField value={b.tags} onChange={(tags) => send({ tags })} suggestions={sidebar.tags} />

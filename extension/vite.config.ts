@@ -2,6 +2,7 @@ import path from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import { phosphorIcons } from '../scripts/vite-phosphor.ts';
 
 const root = import.meta.dirname;
 const outDir = path.resolve(root, '../dist/extension');
@@ -28,7 +29,7 @@ export default defineConfig(({ mode }) =>
     : {
         root,
         base: './',
-        plugins: [react(), tailwindcss()],
+        plugins: [react(), tailwindcss(), phosphorIcons()],
         build: {
           outDir,
           emptyOutDir: true,
