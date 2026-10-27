@@ -1,4 +1,16 @@
-import { ChevronDown, FileUp, FolderPlus, Link2, Menu, Plus, Search, SlidersHorizontal, StickyNote, Upload, X } from 'lucide-react';
+import {
+  CaretDownIcon,
+  FileArrowUpIcon,
+  FolderPlusIcon,
+  LinkIcon,
+  ListIcon,
+  MagnifyingGlassIcon,
+  NoteIcon,
+  PlusIcon,
+  SlidersHorizontalIcon,
+  UploadSimpleIcon,
+  XIcon,
+} from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useSidebar } from '../lib/queries.ts';
@@ -55,9 +67,9 @@ export function TopBar() {
 
   return (
     <div className="flex h-12 shrink-0 items-center gap-2 px-3 md:px-4">
-      <IconButton icon={Menu} label="Show sidebar" size={18} className="md:hidden" onClick={() => setSidebarOpen(true)} />
+      <IconButton icon={ListIcon} label="Show sidebar" size={18} className="md:hidden" onClick={() => setSidebarOpen(true)} />
       <div className="relative flex h-8 w-full max-w-[26rem] items-center rounded-md bg-field focus-within:ring-2 focus-within:ring-accent-soft">
-        <Search size={15} className="ml-2.5 shrink-0 text-ink-3" />
+        <MagnifyingGlassIcon size={15} className="ml-2.5 shrink-0 text-ink-3" />
         <input
           ref={input}
           value={text}
@@ -74,13 +86,13 @@ export function TopBar() {
           aria-label="Search bookmarks"
           className="h-full min-w-0 flex-1 bg-transparent px-2 text-sm outline-none placeholder:text-ink-3"
         />
-        {text && <IconButton icon={X} label="Clear search" size={14} className="size-6" onClick={() => (setText(''), setQuery(''))} />}
+        {text && <IconButton icon={XIcon} label="Clear search" size={14} className="size-6" onClick={() => (setText(''), setQuery(''))} />}
         <Popover
           align="end"
           trigger={(p) => (
             <button {...p} aria-label="Search tips" className="mr-1 flex h-6 items-center gap-0.5 rounded px-1 text-ink-3 hover:bg-hover hover:text-ink-2">
-              <SlidersHorizontal size={14} />
-              <ChevronDown size={11} />
+              <SlidersHorizontalIcon size={14} />
+              <CaretDownIcon size={11} />
             </button>
           )}
         >
@@ -116,32 +128,32 @@ export function TopBar() {
           onClick={() => openDialog(<AddLinkDialog />)}
           className="flex h-8 items-center gap-1.5 rounded-l-md bg-accent pr-3 pl-2.5 text-sm font-semibold text-accent-ink hover:brightness-110"
         >
-          <Plus size={16} strokeWidth={2.2} /> Add
+          <PlusIcon size={16} weight="bold" /> Add
         </button>
         <Popover
           align="end"
           trigger={(p) => (
             <button {...p} aria-label="More ways to add" className={cn('flex h-8 w-7 items-center justify-center rounded-r-md border-l border-white/25 bg-accent text-accent-ink hover:brightness-110')}>
-              <ChevronDown size={14} strokeWidth={2.2} />
+              <CaretDownIcon size={14} weight="bold" />
             </button>
           )}
         >
           {(close) => (
             <>
-              <MenuItem icon={Link2} onClick={() => (close(), openDialog(<AddLinkDialog />))}>
+              <MenuItem icon={LinkIcon} onClick={() => (close(), openDialog(<AddLinkDialog />))}>
                 Link
               </MenuItem>
-              <MenuItem icon={StickyNote} onClick={() => (close(), openDialog(<NoteDialog />))}>
+              <MenuItem icon={NoteIcon} onClick={() => (close(), openDialog(<NoteDialog />))}>
                 Note
               </MenuItem>
-              <MenuItem icon={Upload} onClick={() => (close(), openDialog(<UploadDialog />))}>
+              <MenuItem icon={UploadSimpleIcon} onClick={() => (close(), openDialog(<UploadDialog />))}>
                 Upload files
               </MenuItem>
               <MenuSeparator />
-              <MenuItem icon={FolderPlus} onClick={() => (close(), openDialog(<CollectionDialog />))}>
+              <MenuItem icon={FolderPlusIcon} onClick={() => (close(), openDialog(<CollectionDialog />))}>
                 Collection
               </MenuItem>
-              <MenuItem icon={FileUp} onClick={() => (close(), navigate('/settings/import'))}>
+              <MenuItem icon={FileArrowUpIcon} onClick={() => (close(), navigate('/settings/import'))}>
                 Import bookmarks
               </MenuItem>
             </>

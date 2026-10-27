@@ -1,4 +1,12 @@
-import { ExternalLink, Eye, Heart, RefreshCw, RotateCcw, Trash2, X } from 'lucide-react';
+import {
+  ArrowCounterClockwiseIcon,
+  ArrowSquareOutIcon,
+  ArrowsClockwiseIcon,
+  EyeIcon,
+  HeartIcon,
+  TrashIcon,
+  XIcon,
+} from '@phosphor-icons/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import type { Bookmark } from '../../../shared/types.ts';
@@ -38,7 +46,7 @@ export function BookmarkPanel({ id }: { id: number }) {
       <div className="flex h-12 shrink-0 items-center gap-1 border-b border-line pr-2 pl-4">
         <h2 className="flex-1 text-[0.95rem] font-semibold">{b?.type === 'note' ? 'Edit note' : 'Edit bookmark'}</h2>
         {b && <PanelActions b={b} />}
-        <IconButton icon={X} label="Close" size={18} onClick={() => setPanel(null)} />
+        <IconButton icon={XIcon} label="Close" size={18} onClick={() => setPanel(null)} />
       </div>
       {isLoading ? (
         <div className="flex justify-center py-10">
@@ -60,7 +68,7 @@ function PanelActions({ b }: { b: Bookmark }) {
   if (b.deletedAt) {
     return (
       <IconButton
-        icon={RotateCcw}
+        icon={ArrowCounterClockwiseIcon}
         label="Restore"
         onClick={() => bulk.mutate({ ids: [b.id], action: 'restore' }, { onSuccess: () => toast('Restored'), onError: toastError })}
       />
@@ -68,21 +76,21 @@ function PanelActions({ b }: { b: Bookmark }) {
   }
   return (
     <>
-      {canPreview(b) && <IconButton icon={Eye} label="Preview" onClick={() => setPanel({ kind: 'preview', id: b.id })} />}
+      {canPreview(b) && <IconButton icon={EyeIcon} label="Preview" onClick={() => setPanel({ kind: 'preview', id: b.id })} />}
       {(b.url || b.file) && (
         <a href={b.url ?? b.file!.url} target="_blank" rel="noopener noreferrer" title="Open" className="flex size-7 items-center justify-center rounded-md text-ink-2 hover:bg-hover hover:text-ink">
-          <ExternalLink size={16} strokeWidth={1.8} />
+          <ArrowSquareOutIcon size={16} />
         </a>
       )}
       <IconButton
-        icon={Heart}
+        icon={HeartIcon}
         label={b.favorite ? 'Remove from favorites' : 'Add to favorites'}
         active={b.favorite}
-        className={cn(b.favorite && '[&_svg]:fill-current')}
+        filled={b.favorite}
         onClick={() => update.mutate({ id: b.id, patch: { favorite: !b.favorite } }, { onError: toastError })}
       />
       <IconButton
-        icon={Trash2}
+        icon={TrashIcon}
         label="Move to Trash"
         onClick={() =>
           bulk.mutate(
@@ -233,7 +241,7 @@ function EditForm({ b }: { b: Bookmark }) {
                       }, toastError)
                     }
                   >
-                    <RefreshCw size={12} /> Refresh
+                    <ArrowsClockwiseIcon size={12} /> Refresh
                   </button>
                 </>
               )}

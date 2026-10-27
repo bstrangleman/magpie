@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { CheckIcon } from '@phosphor-icons/react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router';
 import type { Bookmark } from '../../../shared/types.ts';
@@ -80,7 +80,7 @@ export function SavePage() {
     return (
       <Centered>
         <span className="flex size-12 items-center justify-center rounded-full bg-accent text-accent-ink">
-          <Check size={26} strokeWidth={2.5} />
+          <CheckIcon size={26} weight="bold" />
         </span>
         <p className="mt-3 font-semibold">Saved to Magpie</p>
         <p className="text-sm text-ink-2">{collections.find((c) => c.id === collectionId)?.name ?? 'Unsorted'}</p>

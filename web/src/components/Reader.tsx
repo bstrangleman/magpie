@@ -1,5 +1,5 @@
 import DOMPurify from 'dompurify';
-import { ExternalLink, Pencil, X } from 'lucide-react';
+import { ArrowSquareOutIcon, PencilSimpleIcon, XIcon } from '@phosphor-icons/react';
 import { marked } from 'marked';
 import { useMemo } from 'react';
 import type { Bookmark } from '../../../shared/types.ts';
@@ -31,11 +31,11 @@ export function Reader({ id }: { id: number }) {
         <span className="min-w-0 flex-1 truncate text-sm text-ink-2">{b?.site ?? (b?.type === 'note' ? 'Note' : b?.file?.name)}</span>
         {b && (b.url || b.file) && (
           <a href={b.url ?? b.file!.url} target="_blank" rel="noopener noreferrer" className={buttonClass('ghost', 'sm')}>
-            <ExternalLink size={15} strokeWidth={1.9} /> Open
+            <ArrowSquareOutIcon size={15} /> Open
           </a>
         )}
-        <IconButton icon={Pencil} label="Edit" onClick={() => setPanel({ kind: 'edit', id })} />
-        <IconButton icon={X} label="Close" size={18} onClick={() => setPanel(null)} />
+        <IconButton icon={PencilSimpleIcon} label="Edit" onClick={() => setPanel({ kind: 'edit', id })} />
+        <IconButton icon={XIcon} label="Close" size={18} onClick={() => setPanel(null)} />
       </div>
       <div className="flex-1 overflow-y-auto">
         {isLoading || !b ? (

@@ -1,4 +1,4 @@
-import { Globe } from 'lucide-react';
+import { GlobeIcon } from '@phosphor-icons/react';
 import { useState } from 'react';
 import { useSidebar } from '../lib/queries.ts';
 import { cn } from '../lib/utils.ts';
@@ -9,7 +9,7 @@ export { CollectionIcon, PhosphorGlyph } from './collection-list.tsx';
 
 export function Favicon({ src, size = 16, className }: { src: string | null; size?: number; className?: string }) {
   const [failed, setFailed] = useState(false);
-  if (!src || failed) return <Globe size={size} strokeWidth={1.6} className={cn('shrink-0 text-ink-3', className)} />;
+  if (!src || failed) return <GlobeIcon size={size} className={cn('shrink-0 text-ink-3', className)} />;
   return (
     <img
       src={src}

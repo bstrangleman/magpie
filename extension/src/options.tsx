@@ -1,6 +1,6 @@
 import './dev-shim.ts';
 import './styles.css';
-import { Check, Keyboard, LoaderCircle } from 'lucide-react';
+import { CheckIcon, CircleNotchIcon, KeyboardIcon } from '@phosphor-icons/react';
 import { StrictMode, useEffect, useState, type FormEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Me } from '../../shared/types.ts';
@@ -54,7 +54,7 @@ function Options() {
       </div>
       <div className="rounded-xl border border-line bg-surface p-5 shadow-sm">
         {conn === undefined ? (
-          <LoaderCircle size={18} className="animate-spin text-ink-3" />
+          <CircleNotchIcon size={18} className="animate-spin text-ink-3" />
         ) : conn ? (
           <Connected conn={conn} onDisconnected={() => setConn(null)} />
         ) : (
@@ -80,7 +80,7 @@ function Connected({ conn, onDisconnected }: { conn: Connection; onDisconnected:
     <>
       <div className="flex items-start gap-3">
         <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#30a46c] text-white">
-          <Check size={14} strokeWidth={3} />
+          <CheckIcon size={14} weight="bold" />
         </span>
         <div className="min-w-0">
           <p className="font-semibold">Connected</p>
@@ -201,7 +201,7 @@ function HowTo() {
         <b className="text-ink">Right-click</b> a page, link, image or selected text to save it without opening the popup.
       </p>
       <p className="flex items-center gap-1.5">
-        <Keyboard size={15} />
+        <KeyboardIcon size={15} />
         {shortcut ? (
           <>
             Shortcut: <kbd className="rounded border border-line bg-surface px-1.5 font-mono text-xs">{shortcut}</kbd>

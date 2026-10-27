@@ -1,4 +1,4 @@
-import { Plus, X } from 'lucide-react';
+import { PlusIcon, XIcon } from '@phosphor-icons/react';
 import { useRef, useState, type KeyboardEvent } from 'react';
 import { cn } from '../lib/utils.ts';
 
@@ -77,7 +77,7 @@ export function TagField({
               }}
               className="ml-0.5 rounded text-ink-3 hover:text-ink"
             >
-              <X size={12} />
+              <XIcon size={12} />
             </button>
           </span>
         ))}
@@ -119,7 +119,7 @@ export function TagField({
           ))}
           {q && !suggestions.some((s) => s.name.toLowerCase() === q) && (
             <div className="flex items-center gap-1.5 border-t border-line px-3 pt-1.5 pb-0.5 text-xs text-ink-3">
-              <Plus size={12} /> Press Enter to create “{text.trim().replace(/^#/, '')}”
+              <PlusIcon size={12} /> Press Enter to create “{text.trim().replace(/^#/, '')}”
             </div>
           )}
         </div>

@@ -1,20 +1,20 @@
 import {
-  CirclePlay,
-  Cloud,
-  Copy,
-  FileText,
-  Ghost,
-  Hash,
-  Heart,
-  Image,
-  Inbox,
-  Link,
-  Music,
-  Newspaper,
-  StickyNote,
-  Trash2,
-  type LucideIcon,
-} from 'lucide-react';
+  ArticleIcon,
+  CloudIcon,
+  CopyIcon,
+  FilesIcon,
+  GhostIcon,
+  HashIcon,
+  HeartIcon,
+  ImageIcon,
+  LinkIcon,
+  MusicNotesIcon,
+  NoteIcon,
+  TrashIcon,
+  TrayIcon,
+  VideoIcon,
+  type Icon,
+} from '@phosphor-icons/react';
 import { FILTERS, type Filter, type Sort } from '../../../shared/types.ts';
 
 export type View =
@@ -95,24 +95,24 @@ export function listQuery(view: View, q: string, sort: Sort): string {
   return p.toString();
 }
 
-export const SYSTEM_VIEWS: { kind: 'all' | 'unsorted' | 'trash'; label: string; icon: LucideIcon }[] = [
-  { kind: 'all', label: 'All bookmarks', icon: Cloud },
-  { kind: 'unsorted', label: 'Unsorted', icon: Inbox },
-  { kind: 'trash', label: 'Trash', icon: Trash2 },
+export const SYSTEM_VIEWS: { kind: 'all' | 'unsorted' | 'trash'; label: string; icon: Icon }[] = [
+  { kind: 'all', label: 'All bookmarks', icon: CloudIcon },
+  { kind: 'unsorted', label: 'Unsorted', icon: TrayIcon },
+  { kind: 'trash', label: 'Trash', icon: TrashIcon },
 ];
 
-export const FILTER_META: Record<Filter, { label: string; icon: LucideIcon; color: string }> = {
-  favorites: { label: 'Favorites', icon: Heart, color: '#e5484d' },
-  notes: { label: 'Notes', icon: StickyNote, color: '#e2a336' },
-  links: { label: 'Links', icon: Link, color: '#8b8d98' },
-  articles: { label: 'Articles', icon: Newspaper, color: '#e5803a' },
-  videos: { label: 'Videos', icon: CirclePlay, color: '#6e56cf' },
-  images: { label: 'Images', icon: Image, color: '#30a46c' },
-  audios: { label: 'Audios', icon: Music, color: '#8e4ec6' },
-  documents: { label: 'Documents', icon: FileText, color: '#3e63dd' },
-  broken: { label: 'Broken links', icon: Ghost, color: '#e5484d' },
-  duplicates: { label: 'Duplicates', icon: Copy, color: '#12a594' },
-  untagged: { label: 'Without tags', icon: Hash, color: '#8b8d98' },
+export const FILTER_META: Record<Filter, { label: string; icon: Icon; color: string }> = {
+  favorites: { label: 'Favorites', icon: HeartIcon, color: '#e5484d' },
+  notes: { label: 'Notes', icon: NoteIcon, color: '#e2a336' },
+  links: { label: 'Links', icon: LinkIcon, color: '#8b8d98' },
+  articles: { label: 'Articles', icon: ArticleIcon, color: '#e5803a' },
+  videos: { label: 'Video', icon: VideoIcon, color: '#6e56cf' },
+  images: { label: 'Images', icon: ImageIcon, color: '#30a46c' },
+  audios: { label: 'Audio', icon: MusicNotesIcon, color: '#8e4ec6' },
+  documents: { label: 'Documents', icon: FilesIcon, color: '#3e63dd' },
+  broken: { label: 'Broken links', icon: GhostIcon, color: '#e5484d' },
+  duplicates: { label: 'Duplicates', icon: CopyIcon, color: '#12a594' },
+  untagged: { label: 'Without tags', icon: HashIcon, color: '#8b8d98' },
 };
 
 export const SORT_LABELS: Record<Sort, string> = {

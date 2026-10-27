@@ -158,7 +158,7 @@ Failed sign-ins are limited to 10 per account and 50 per client address every 15
 | Search         | SQLite **FTS5** (porter stemming, prefix matching, bm25 ranking with title > tags > description/notes > URL > page text), so no separate search server is needed. |
 | Metadata       | `fetch` (undici) with SSRF checks on every redirect and at connect time (so DNS rebinding can't slip past), Open Graph/Twitter tags, oEmbed for YouTube/Vimeo, and Mozilla Readability + `sanitize-html` for the reader view, run in a worker thread. Covers and site icons are cached locally. |
 | Background jobs | An in-process queue. Pending fetches are stored as `fetch_status = 'pending'`, so they resume after a restart.                     |
-| Web client     | React, Vite, TanStack Query, React Router, Tailwind CSS and Lucide icons. Collection icons are [Phosphor](https://phosphoricons.com) (MIT), stored as `ph:<name>`; the set loads as one lazily loaded chunk |
+| Web client     | React, Vite, TanStack Query, React Router, Tailwind CSS and [Phosphor](https://phosphoricons.com) icons (MIT), generated at build time with only the weights the app uses. Collection icons are stored as `ph:<name>`; the full set for the picker loads as one lazily loaded chunk |
 
 ### Data model
 

@@ -1,6 +1,6 @@
 {
   "name": "magpie",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "private": true,
   "description": "A minimal, self-hosted bookmark manager",
   "type": "module",
@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@phosphor-icons/core": "^2.1.1",
+    "@phosphor-icons/react": "^2.1.10",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.104.5",
     "@types/chrome": "^0.3.6",
@@ -41,7 +42,6 @@
     "@vitejs/plugin-react": "^6.1.2",
     "concurrently": "^10.0.6",
     "dompurify": "^3.4.17",
-    "lucide-react": "^1.61.0",
     "marked": "^18.1.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

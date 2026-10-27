@@ -1,21 +1,21 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  ChartColumn,
-  ChevronDown,
-  ChevronRight,
-  Ellipsis,
-  FolderPlus,
-  Hash,
-  LogOut,
-  Moon,
-  Pencil,
-  Plus,
-  Settings,
-  Sun,
-  Trash2,
-  Upload,
-  type LucideIcon,
-} from 'lucide-react';
+  CaretDownIcon,
+  CaretRightIcon,
+  ChartBarIcon,
+  DotsThreeIcon,
+  FolderPlusIcon,
+  GearIcon,
+  HashIcon,
+  MoonIcon,
+  PencilSimpleIcon,
+  PlusIcon,
+  SignOutIcon,
+  SunIcon,
+  TrashIcon,
+  UploadSimpleIcon,
+  type Icon,
+} from '@phosphor-icons/react';
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { FILTERS, type CollectionGroup, type Sidebar as SidebarData, type Tag } from '../../../shared/types.ts';
@@ -75,7 +75,7 @@ export function Sidebar() {
       <header className="flex h-12 shrink-0 items-center gap-1 pr-2 pl-1.5">
         <UserMenu />
         <IconButton
-          icon={Plus}
+          icon={PlusIcon}
           label="New collection"
           size={18}
           onClick={() => openDialog(<CollectionDialog groupId={data?.groups[0]?.id ?? null} />)}
@@ -112,8 +112,8 @@ export function Sidebar() {
   );
 }
 
-const FilterIcon = ({ icon: Icon, color }: { icon: LucideIcon; color: string }) => (
-  <Icon size={17} strokeWidth={1.8} style={{ color }} className="shrink-0" />
+const FilterIcon = ({ icon: Icon, color }: { icon: Icon; color: string }) => (
+  <Icon size={17} style={{ color }} className="shrink-0" />
 );
 
 function UserMenu() {
@@ -128,28 +128,28 @@ function UserMenu() {
         <button {...p} className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 text-left hover:bg-hover">
           <Avatar name={me.name} size={22} />
           <span className="truncate text-[0.93rem] font-semibold">{me.name}</span>
-          <ChevronDown size={13} className="shrink-0 text-ink-3" />
+          <CaretDownIcon size={13} className="shrink-0 text-ink-3" />
         </button>
       )}
     >
       {(close) => (
         <>
           <div className="px-3 pt-1 pb-2 text-xs text-ink-3">{me.email}</div>
-          <MenuItem icon={Settings} onClick={() => (close(), navigate('/settings/app'))}>
+          <MenuItem icon={GearIcon} onClick={() => (close(), navigate('/settings/app'))}>
             Settings
           </MenuItem>
-          <MenuItem icon={ChartColumn} onClick={() => (close(), navigate('/settings/stats'))}>
+          <MenuItem icon={ChartBarIcon} onClick={() => (close(), navigate('/settings/stats'))}>
             Statistics
           </MenuItem>
-          <MenuItem icon={Upload} onClick={() => (close(), navigate('/settings/import'))}>
+          <MenuItem icon={UploadSimpleIcon} onClick={() => (close(), navigate('/settings/import'))}>
             Import bookmarks
           </MenuItem>
-          <MenuItem icon={dark ? Sun : Moon} onClick={() => (close(), save.mutate({ theme: dark ? 'light' : 'dark' }))}>
+          <MenuItem icon={dark ? SunIcon : MoonIcon} onClick={() => (close(), save.mutate({ theme: dark ? 'light' : 'dark' }))}>
             {dark ? 'Light theme' : 'Dark theme'}
           </MenuItem>
           <MenuSeparator />
           <MenuItem
-            icon={LogOut}
+            icon={SignOutIcon}
             onClick={async () => {
               close();
               await api.post('/auth/logout');
@@ -170,7 +170,7 @@ function SectionHeader({ label, open, onToggle, actions }: { label: string; open
     <div className="group/section mt-3 flex h-7 items-center pr-2 pl-3">
       <button onClick={onToggle} className="flex flex-1 items-center gap-1 truncate text-left text-[0.8rem] text-ink-3 hover:text-ink-2">
         {label}
-        <ChevronDown size={12} className={cn('opacity-0 transition group-hover/section:opacity-100', !open && '-rotate-90')} />
+        <CaretDownIcon size={12} className={cn('opacity-0 transition group-hover/section:opacity-100', !open && '-rotate-90')} />
       </button>
       {actions && <div className="flex opacity-0 group-hover/section:opacity-100 focus-within:opacity-100">{actions}</div>}
     </div>
@@ -235,7 +235,7 @@ function Row({ to, view, icon, label, count, depth = 0, caret, menu, drop, rowPr
           style={{ left: pad - 15 }}
           className={cn('absolute inset-y-0 flex w-4 items-center justify-center', active ? 'text-accent-ink/80' : 'text-ink-3 hover:text-ink')}
         >
-          {caret.open ? <ChevronDown size={12} strokeWidth={2.5} /> : <ChevronRight size={12} strokeWidth={2.5} />}
+          {caret.open ? <CaretDownIcon size={12} weight="bold" /> : <CaretRightIcon size={12} weight="bold" />}
         </button>
       )}
       {menu && (
@@ -249,7 +249,7 @@ function Row({ to, view, icon, label, count, depth = 0, caret, menu, drop, rowPr
             anchor && 'flex',
           )}
         >
-          <Ellipsis size={15} />
+          <DotsThreeIcon size={15} />
         </button>
       )}
       {drop === 'before' && <div className="pointer-events-none absolute inset-x-2 top-0 h-0.5 rounded bg-accent" style={{ left: pad }} />}
@@ -288,7 +288,7 @@ function useDropTarget(accept: (e: React.DragEvent, el: HTMLElement) => Zone | n
   };
 }
 
-function SystemRow({ kind, label, icon: Icon, count }: { kind: 'all' | 'unsorted' | 'trash'; label: string; icon: LucideIcon; count: number }) {
+function SystemRow({ kind, label, icon: Icon, count }: { kind: 'all' | 'unsorted' | 'trash'; label: string; icon: Icon; count: number }) {
   const bulk = useBulk();
   const target = useDropTarget(
     () => (kind !== 'all' && dnd.get()?.type === 'bookmarks' ? 'inside' : null),
@@ -308,7 +308,7 @@ function SystemRow({ kind, label, icon: Icon, count }: { kind: 'all' | 'unsorted
     <Row
       to={`/${kind}`}
       view={{ kind }}
-      icon={<Icon size={18} strokeWidth={1.6} className="text-ink-2" />}
+      icon={<Icon size={18} className="text-ink-2" />}
       label={label}
       count={count}
       drop={target.zone}
@@ -353,15 +353,15 @@ function GroupSection({ group, nodes, data }: { group: CollectionGroup; nodes: T
           onToggle={toggle}
           actions={
             <>
-              <IconButton icon={Plus} label="New collection" size={14} className="size-6" onClick={() => openDialog(<CollectionDialog groupId={group.id} />)} />
-              <Popover align="end" trigger={(p) => <IconButton {...p} icon={Ellipsis} label="Group options" size={14} className="size-6" />}>
+              <IconButton icon={PlusIcon} label="New collection" size={14} className="size-6" onClick={() => openDialog(<CollectionDialog groupId={group.id} />)} />
+              <Popover align="end" trigger={(p) => <IconButton {...p} icon={DotsThreeIcon} label="Group options" size={14} className="size-6" />}>
                 {(close) => (
                   <>
-                    <MenuItem icon={FolderPlus} onClick={() => (close(), openDialog(<CollectionDialog groupId={group.id} />))}>
+                    <MenuItem icon={FolderPlusIcon} onClick={() => (close(), openDialog(<CollectionDialog groupId={group.id} />))}>
                       New collection
                     </MenuItem>
                     <MenuItem
-                      icon={Pencil}
+                      icon={PencilSimpleIcon}
                       onClick={() => {
                         close();
                         openDialog(
@@ -372,7 +372,7 @@ function GroupSection({ group, nodes, data }: { group: CollectionGroup; nodes: T
                       Rename group
                     </MenuItem>
                     <MenuItem
-                      icon={Plus}
+                      icon={PlusIcon}
                       onClick={() => {
                         close();
                         openDialog(
@@ -384,7 +384,7 @@ function GroupSection({ group, nodes, data }: { group: CollectionGroup; nodes: T
                     </MenuItem>
                     {data.groups.length > 1 && (
                       <MenuItem
-                        icon={Trash2}
+                        icon={TrashIcon}
                         danger
                         onClick={() => {
                           close();
@@ -411,7 +411,7 @@ function GroupSection({ group, nodes, data }: { group: CollectionGroup; nodes: T
       {!group.collapsed && nodes.map((n) => <CollectionNode key={n.collection.id} node={n} siblings={nodes} groupId={group.id} />)}
       {!group.collapsed && nodes.length === 0 && (
         <button onClick={() => openDialog(<CollectionDialog groupId={group.id} />)} className="flex h-8 w-full items-center gap-2 pl-3 text-sm text-ink-3 hover:text-ink-2">
-          <Plus size={15} /> Create collection
+          <PlusIcon size={15} /> Create collection
         </button>
       )}
     </div>
@@ -471,14 +471,14 @@ function CollectionNode({ node, siblings, groupId }: { node: TreeNode; siblings:
 
   const menu = (close: () => void) => (
     <>
-      <MenuItem icon={FolderPlus} onClick={() => (close(), openDialog(<CollectionDialog parentId={c.id} />))}>
+      <MenuItem icon={FolderPlusIcon} onClick={() => (close(), openDialog(<CollectionDialog parentId={c.id} />))}>
         New nested collection
       </MenuItem>
-      <MenuItem icon={Pencil} onClick={() => (close(), openDialog(<CollectionDialog collection={c} />))}>
+      <MenuItem icon={PencilSimpleIcon} onClick={() => (close(), openDialog(<CollectionDialog collection={c} />))}>
         Edit name, icon & colour
       </MenuItem>
       <MenuSeparator />
-      <MenuItem icon={Trash2} danger onClick={() => (close(), openDialog(<DeleteCollectionDialog collection={c} onDeleted={() => view.kind === 'collection' && view.id === c.id && navigate('/all')} />))}>
+      <MenuItem icon={TrashIcon} danger onClick={() => (close(), openDialog(<DeleteCollectionDialog collection={c} onDeleted={() => view.kind === 'collection' && view.id === c.id && navigate('/all')} />))}>
         Delete collection
       </MenuItem>
     </>
@@ -530,7 +530,7 @@ function TagRow({ tag }: { tag: Tag }) {
     <Row
       to={pathOf({ kind: 'tag', tag: tag.name })}
       view={{ kind: 'tag', tag: tag.name }}
-      icon={<Hash size={16} strokeWidth={1.8} className="text-ink-3" />}
+      icon={<HashIcon size={16} className="text-ink-3" />}
       label={tag.name}
       count={tag.count}
       drop={target.zone}
@@ -538,7 +538,7 @@ function TagRow({ tag }: { tag: Tag }) {
       menu={(close) => (
         <>
           <MenuItem
-            icon={Pencil}
+            icon={PencilSimpleIcon}
             onClick={() => {
               close();
               openDialog(
@@ -558,7 +558,7 @@ function TagRow({ tag }: { tag: Tag }) {
             Rename tag
           </MenuItem>
           <MenuItem
-            icon={Trash2}
+            icon={TrashIcon}
             danger
             onClick={() => {
               close();

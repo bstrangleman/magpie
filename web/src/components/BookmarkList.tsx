@@ -1,27 +1,26 @@
 import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import {
-  AlignJustify,
-  ArrowUpDown,
-  CheckSquare,
-  Download,
-  Ellipsis,
-  FolderInput,
-  FolderPlus,
-  Hash,
-  Heart,
-  LayoutDashboard,
-  LayoutGrid,
-  List,
-  Pencil,
-  Plus,
-  RefreshCw,
-  RotateCcw,
-  Tag,
-  Trash2,
-  Upload,
-  X,
-  type LucideIcon,
-} from 'lucide-react';
+  ArrowCounterClockwiseIcon,
+  ArrowsClockwiseIcon,
+  ArrowsDownUpIcon,
+  CheckSquareIcon,
+  DotsThreeIcon,
+  DownloadSimpleIcon,
+  FolderOpenIcon,
+  FolderPlusIcon,
+  HashIcon,
+  HeartIcon,
+  LayoutIcon,
+  ListIcon,
+  PencilSimpleIcon,
+  PlusIcon,
+  RowsIcon,
+  SquaresFourIcon,
+  TrashIcon,
+  UploadSimpleIcon,
+  XIcon,
+  type Icon,
+} from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import type { Bookmark, BookmarkPage, Sort, ViewMode } from '../../../shared/types.ts';
@@ -37,11 +36,11 @@ import { toast, toastError } from './toast.tsx';
 import { Button, IconButton, MenuItem, MenuLabel, MenuSeparator, Popover, Spinner } from './ui.tsx';
 import { useUI } from './ui-context.tsx';
 
-const VIEW_MODES: { value: ViewMode; label: string; icon: LucideIcon }[] = [
-  { value: 'list', label: 'List', icon: List },
-  { value: 'cards', label: 'Cards', icon: LayoutGrid },
-  { value: 'headlines', label: 'Headlines', icon: AlignJustify },
-  { value: 'moodboard', label: 'Moodboard', icon: LayoutDashboard },
+const VIEW_MODES: { value: ViewMode; label: string; icon: Icon }[] = [
+  { value: 'list', label: 'List', icon: ListIcon },
+  { value: 'cards', label: 'Cards', icon: SquaresFourIcon },
+  { value: 'headlines', label: 'Headlines', icon: RowsIcon },
+  { value: 'moodboard', label: 'Moodboard', icon: LayoutIcon },
 ];
 
 export function BookmarkList() {
@@ -324,13 +323,13 @@ function viewTitle(view: View, sidebarName?: string): { icon: ReactNode; title: 
       return { icon: null, title: sidebarName ?? 'Collection' };
     case 'filter': {
       const m = FILTER_META[view.filter];
-      return { icon: <m.icon size={20} strokeWidth={1.8} style={{ color: m.color }} />, title: m.label };
+      return { icon: <m.icon size={20} style={{ color: m.color }} />, title: m.label };
     }
     case 'tag':
-      return { icon: <Hash size={20} strokeWidth={1.8} className="text-ink-3" />, title: view.tag };
+      return { icon: <HashIcon size={20} className="text-ink-3" />, title: view.tag };
     default: {
       const s = SYSTEM_VIEWS.find((x) => x.kind === view.kind)!;
-      return { icon: <s.icon size={20} strokeWidth={1.6} className="text-ink-2" />, title: s.label };
+      return { icon: <s.icon size={20} className="text-ink-2" />, title: s.label };
     }
   }
 }
@@ -391,7 +390,7 @@ function Header({
         <Popover
           align="end"
           trigger={(p) => (
-            <Button {...p} variant="ghost" size="sm" icon={ArrowUpDown} className="max-sm:hidden">
+            <Button {...p} variant="ghost" size="sm" icon={ArrowsDownUpIcon} className="max-sm:hidden">
               {SORT_LABELS[prefs.sort].replace(/ \(.*|\s[↑↓]/, '')}
             </Button>
           )}
@@ -431,7 +430,7 @@ function Header({
         <Popover
           align="end"
           trigger={(p) => (
-            <Button {...p} variant="ghost" size="sm" icon={Download} className="max-md:hidden">
+            <Button {...p} variant="ghost" size="sm" icon={DownloadSimpleIcon} className="max-md:hidden">
               Export
             </Button>
           )}
@@ -448,28 +447,28 @@ function Header({
           )}
         </Popover>
       )}
-      <Popover align="end" trigger={(p) => <IconButton {...p} icon={Ellipsis} label="More" size={18} />}>
+      <Popover align="end" trigger={(p) => <IconButton {...p} icon={DotsThreeIcon} label="More" size={18} />}>
         {(close) => (
           <>
-            <MenuItem icon={CheckSquare} onClick={() => (close(), onSelect())}>
+            <MenuItem icon={CheckSquareIcon} onClick={() => (close(), onSelect())}>
               Select bookmarks
             </MenuItem>
             {view.kind !== 'trash' && (
-              <MenuItem icon={Plus} onClick={() => (close(), openDialog(<AddLinkDialog />))}>
+              <MenuItem icon={PlusIcon} onClick={() => (close(), openDialog(<AddLinkDialog />))}>
                 Add bookmark
               </MenuItem>
             )}
             {collection && (
               <>
                 <MenuSeparator />
-                <MenuItem icon={Pencil} onClick={() => (close(), openDialog(<CollectionDialog collection={collection} />))}>
+                <MenuItem icon={PencilSimpleIcon} onClick={() => (close(), openDialog(<CollectionDialog collection={collection} />))}>
                   Edit collection
                 </MenuItem>
-                <MenuItem icon={FolderPlus} onClick={() => (close(), openDialog(<CollectionDialog parentId={collection.id} />))}>
+                <MenuItem icon={FolderPlusIcon} onClick={() => (close(), openDialog(<CollectionDialog parentId={collection.id} />))}>
                   New nested collection
                 </MenuItem>
                 <MenuItem
-                  icon={Trash2}
+                  icon={TrashIcon}
                   danger
                   onClick={() => (close(), openDialog(<DeleteCollectionDialog collection={collection} onDeleted={() => navigate('/all')} />))}
                 >
@@ -481,7 +480,7 @@ function Header({
               <>
                 <MenuSeparator />
                 <MenuItem
-                  icon={Trash2}
+                  icon={TrashIcon}
                   danger
                   onClick={() => {
                     close();
@@ -538,7 +537,7 @@ function SelectionBar({
   const label = plural(n, 'bookmark');
   return (
     <div className="flex h-12 shrink-0 items-center gap-1 border-b border-line bg-accent-soft pr-2 pl-3 md:pr-3">
-      <IconButton icon={X} label="Cancel selection" onClick={onClear} />
+      <IconButton icon={XIcon} label="Cancel selection" onClick={onClear} />
       <span className="mr-1 text-sm font-semibold whitespace-nowrap">{n} selected</span>
       {n < total && (
         <Button variant="ghost" size="sm" onClick={onSelectAll} className="max-sm:hidden">
@@ -548,13 +547,13 @@ function SelectionBar({
       <div className="flex-1" />
       {inTrash ? (
         <>
-          <Button size="sm" variant="ghost" icon={RotateCcw} disabled={none} onClick={() => run({ action: 'restore' }, `Restored ${label}`)}>
+          <Button size="sm" variant="ghost" icon={ArrowCounterClockwiseIcon} disabled={none} onClick={() => run({ action: 'restore' }, `Restored ${label}`)}>
             Restore
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            icon={Trash2}
+            icon={TrashIcon}
             disabled={none}
             className="text-danger"
             onClick={() =>
@@ -576,7 +575,7 @@ function SelectionBar({
           <Popover
             align="end"
             trigger={(p) => (
-              <Button {...p} size="sm" variant="ghost" icon={FolderInput} disabled={none}>
+              <Button {...p} size="sm" variant="ghost" icon={FolderOpenIcon} disabled={none}>
                 <span className="hidden sm:inline">Move</span>
               </Button>
             )}
@@ -593,7 +592,7 @@ function SelectionBar({
           <Popover
             align="end"
             trigger={(p) => (
-              <Button {...p} size="sm" variant="ghost" icon={Tag} disabled={none}>
+              <Button {...p} size="sm" variant="ghost" icon={HashIcon} disabled={none}>
                 <span className="hidden sm:inline">Tags</span>
               </Button>
             )}
@@ -631,23 +630,23 @@ function SelectionBar({
           </Popover>
           <Popover
             align="end"
-            trigger={(p) => <IconButton {...p} icon={Ellipsis} label="More actions" disabled={none} />}
+            trigger={(p) => <IconButton {...p} icon={DotsThreeIcon} label="More actions" disabled={none} />}
           >
             {(close) => (
               <>
-                <MenuItem icon={Heart} onClick={() => (close(), run({ action: 'favorite', value: true }, 'Added to favorites'))}>
+                <MenuItem icon={HeartIcon} onClick={() => (close(), run({ action: 'favorite', value: true }, 'Added to favorites'))}>
                   Add to favorites
                 </MenuItem>
-                <MenuItem icon={Heart} onClick={() => (close(), run({ action: 'favorite', value: false }, 'Removed from favorites'))}>
+                <MenuItem icon={HeartIcon} onClick={() => (close(), run({ action: 'favorite', value: false }, 'Removed from favorites'))}>
                   Remove from favorites
                 </MenuItem>
-                <MenuItem icon={RefreshCw} onClick={() => (close(), run({ action: 'refetch' }, 'Refreshing metadata…'))}>
+                <MenuItem icon={ArrowsClockwiseIcon} onClick={() => (close(), run({ action: 'refetch' }, 'Refreshing metadata…'))}>
                   Refresh metadata
                 </MenuItem>
               </>
             )}
           </Popover>
-          <Button size="sm" variant="ghost" icon={Trash2} disabled={none} className="hover:text-danger" onClick={() => run({ action: 'trash' }, `Moved ${label} to Trash`)}>
+          <Button size="sm" variant="ghost" icon={TrashIcon} disabled={none} className="hover:text-danger" onClick={() => run({ action: 'trash' }, `Moved ${label} to Trash`)}>
             <span className="hidden sm:inline">Delete</span>
           </Button>
         </>
@@ -673,7 +672,7 @@ function EmptyState({ view, q }: { view: View; q: string }) {
   if (view.kind === 'trash') return <Empty title="Trash is empty" body="Deleted bookmarks stay here until you empty the Trash." />;
   if (view.kind === 'filter' || view.kind === 'tag') return <Empty title="Nothing here yet" />;
   const add = (
-    <Button variant="primary" icon={Plus} onClick={() => openDialog(<AddLinkDialog />)}>
+    <Button variant="primary" icon={PlusIcon} onClick={() => openDialog(<AddLinkDialog />)}>
       Add bookmark
     </Button>
   );
@@ -681,7 +680,7 @@ function EmptyState({ view, q }: { view: View; q: string }) {
     return (
       <Empty title="Welcome to Magpie" body="Save links, notes and files, then organise them into collections. Paste or drag a link anywhere on this page to save it.">
         {add}
-        <Button icon={Upload} onClick={() => navigate('/settings/import')}>
+        <Button icon={UploadSimpleIcon} onClick={() => navigate('/settings/import')}>
           Import bookmarks
         </Button>
       </Empty>

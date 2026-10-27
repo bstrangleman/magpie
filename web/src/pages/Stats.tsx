@@ -1,27 +1,27 @@
 import {
-  AppWindow,
-  ArrowDown,
-  ArrowUp,
-  Bookmark,
-  BookOpen,
-  CircleAlert,
-  CircleHelp,
-  Code,
-  FileText,
-  FileUp,
-  Flame,
-  Folder,
-  HardDrive,
-  Hash,
-  Heart,
-  Inbox,
-  LoaderCircle,
-  Minus,
-  Puzzle,
-  StickyNote,
-  Trash2,
-  type LucideIcon,
-} from 'lucide-react';
+  AppWindowIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
+  BookOpenIcon,
+  BookmarkSimpleIcon,
+  CircleNotchIcon,
+  CodeIcon,
+  FileArrowUpIcon,
+  FileTextIcon,
+  FireIcon,
+  FolderIcon,
+  HardDriveIcon,
+  HashIcon,
+  HeartIcon,
+  MinusIcon,
+  NoteIcon,
+  PuzzlePieceIcon,
+  QuestionIcon,
+  TrashIcon,
+  TrayIcon,
+  WarningCircleIcon,
+  type Icon,
+} from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import type { BookmarkType, Stats } from '../../../shared/types.ts';
@@ -104,26 +104,26 @@ function streaks(days: { count: number }[]) {
 
 // --- Labels -------------------------------------------------------------------------------------
 
-const TYPES: Record<BookmarkType, { label: string; icon: LucideIcon; color: string }> = {
+const TYPES: Record<BookmarkType, { label: string; icon: Icon; color: string }> = {
   link: { label: 'Links', icon: FILTER_META.links.icon, color: 'var(--viz-1)' },
   article: { label: 'Articles', icon: FILTER_META.articles.icon, color: 'var(--viz-2)' },
   video: { label: 'Videos', icon: FILTER_META.videos.icon, color: 'var(--viz-3)' },
   image: { label: 'Images', icon: FILTER_META.images.icon, color: 'var(--viz-4)' },
   audio: { label: 'Audio', icon: FILTER_META.audios.icon, color: 'var(--viz-5)' },
   document: { label: 'Documents', icon: FILTER_META.documents.icon, color: 'var(--viz-6)' },
-  note: { label: 'Notes', icon: StickyNote, color: 'var(--viz-7)' },
+  note: { label: 'Notes', icon: NoteIcon, color: 'var(--viz-7)' },
 };
 
-const SOURCES: Record<Stats['sources'][number]['source'], { label: string; icon: LucideIcon }> = {
-  web: { label: 'Web app', icon: AppWindow },
-  extension: { label: 'Browser extension', icon: Puzzle },
-  bookmarklet: { label: 'Bookmarklet', icon: Bookmark },
-  api: { label: 'API', icon: Code },
-  import: { label: 'Imported', icon: FileUp },
-  unknown: { label: 'Not recorded', icon: CircleHelp },
+const SOURCES: Record<Stats['sources'][number]['source'], { label: string; icon: Icon }> = {
+  web: { label: 'Web app', icon: AppWindowIcon },
+  extension: { label: 'Browser extension', icon: PuzzlePieceIcon },
+  bookmarklet: { label: 'Bookmarklet', icon: BookmarkSimpleIcon },
+  api: { label: 'API', icon: CodeIcon },
+  import: { label: 'Imported', icon: FileArrowUpIcon },
+  unknown: { label: 'Not recorded', icon: QuestionIcon },
 };
 
-const small = (Icon: LucideIcon) => <Icon size={15} strokeWidth={1.7} className="shrink-0 text-ink-3" />;
+const small = (Icon: Icon) => <Icon size={15} className="shrink-0 text-ink-3" />;
 
 // --- Page -------------------------------------------------------------------------------------------
 
@@ -202,14 +202,14 @@ export function StatsPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          <StatTile label="Collections" icon={small(Folder)} value={big(s.totals.collections)} />
-          <StatTile label="Tags" icon={small(Hash)} value={big(s.totals.tags)} />
-          <StatTile label="Favorites" icon={small(Heart)} value={big(s.totals.favorites)} />
-          <StatTile label="Notes" icon={small(StickyNote)} value={big(s.totals.notes)} />
-          <StatTile label="Storage" icon={small(HardDrive)} value={formatBytes(s.storage.total)} detail={plural(s.totals.files, 'upload')} />
+          <StatTile label="Collections" icon={small(FolderIcon)} value={big(s.totals.collections)} />
+          <StatTile label="Tags" icon={small(HashIcon)} value={big(s.totals.tags)} />
+          <StatTile label="Favorites" icon={small(HeartIcon)} value={big(s.totals.favorites)} />
+          <StatTile label="Notes" icon={small(NoteIcon)} value={big(s.totals.notes)} />
+          <StatTile label="Storage" icon={small(HardDriveIcon)} value={formatBytes(s.storage.total)} detail={plural(s.totals.files, 'upload')} />
           <StatTile
             label="Reading time"
-            icon={small(BookOpen)}
+            icon={small(BookOpenIcon)}
             value={`≈ ${readingTime(s.reading.words)}`}
             detail={`in ${plural(s.reading.articles, 'saved article')}`}
           />
@@ -229,7 +229,7 @@ export function StatsPage() {
           <CalendarHeatmap days={a.days} />
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-1.5 text-xs text-ink-2">
-              <Flame size={14} className="text-ink-3" />
+              <FireIcon size={14} className="text-ink-3" />
               {current > 0 ? `${plural(current, 'day')} in a row` : 'No current streak'}
               <span className="text-ink-3">· longest {plural(longest, 'day')}</span>
             </div>
@@ -304,7 +304,7 @@ export function StatsPage() {
               items={s.topTags.map((t) => ({
                 key: t.name,
                 label: t.name,
-                icon: small(Hash),
+                icon: small(HashIcon),
                 value: t.count,
                 href: `/tag/${encodeURIComponent(t.name)}`,
               }))}
@@ -338,7 +338,7 @@ export function StatsPage() {
               items={s.storage.groups.map((g) => ({
                 key: g.label,
                 label: g.label,
-                icon: small(g.label === 'Preview images' ? FILTER_META.images.icon : FileText),
+                icon: small(g.label === 'Preview images' ? FILTER_META.images.icon : FileTextIcon),
                 value: g.size,
                 display: formatBytes(g.size),
                 tip: <TipBody value={formatBytes(g.size)} label={`${g.label} · ${plural(g.count, 'file')}`} />,
@@ -352,11 +352,11 @@ export function StatsPage() {
             <ul className="divide-y divide-line text-[0.85rem]">
               <HealthRow icon={FILTER_META.broken.icon} label="Broken links" count={health.broken} to="/filter/broken" />
               <HealthRow icon={FILTER_META.duplicates.icon} label="Duplicates" count={health.duplicates} to="/filter/duplicates" />
-              <HealthRow icon={Hash} label="Without tags" count={health.untagged} to="/filter/untagged" />
-              <HealthRow icon={Inbox} label="Unsorted" count={health.unsorted} to="/unsorted" />
-              <HealthRow icon={CircleAlert} label="Couldn't fetch details" count={health.failed} />
-              {health.pending > 0 && <HealthRow icon={LoaderCircle} label="Fetching details" count={health.pending} />}
-              <HealthRow icon={Trash2} label="In the Trash" count={health.trash} to="/trash" />
+              <HealthRow icon={HashIcon} label="Without tags" count={health.untagged} to="/filter/untagged" />
+              <HealthRow icon={TrayIcon} label="Unsorted" count={health.unsorted} to="/unsorted" />
+              <HealthRow icon={WarningCircleIcon} label="Couldn't fetch details" count={health.failed} />
+              {health.pending > 0 && <HealthRow icon={CircleNotchIcon} label="Fetching details" count={health.pending} />}
+              <HealthRow icon={TrashIcon} label="In the Trash" count={health.trash} to="/trash" />
             </ul>
           </ChartCard>
         </div>
@@ -380,7 +380,7 @@ function PageHeader({ s }: { s: Stats }) {
 function Period({ label, value, previous, than }: { label: string; value: number; previous: number; than: string }) {
   const diff = value - previous;
   // Saving more or less isn't good or bad, so the change stays in neutral ink.
-  const Icon = diff > 0 ? ArrowUp : diff < 0 ? ArrowDown : Minus;
+  const Icon = diff > 0 ? ArrowUpIcon : diff < 0 ? ArrowDownIcon : MinusIcon;
   return (
     <div className="flex items-center justify-between gap-3 px-5 py-3.5">
       <div>
@@ -395,10 +395,10 @@ function Period({ label, value, previous, than }: { label: string; value: number
   );
 }
 
-function HealthRow({ icon: Icon, label, count, to }: { icon: LucideIcon; label: string; count: number; to?: string }): ReactNode {
+function HealthRow({ icon: Icon, label, count, to }: { icon: Icon; label: string; count: number; to?: string }): ReactNode {
   const body = (
     <>
-      <Icon size={15} strokeWidth={1.7} className="shrink-0 text-ink-3" />
+      <Icon size={15} className="shrink-0 text-ink-3" />
       <span className="flex-1">{label}</span>
       <span className={cn('tabular-nums', count ? 'font-medium text-ink' : 'text-ink-3')}>{count.toLocaleString()}</span>
     </>

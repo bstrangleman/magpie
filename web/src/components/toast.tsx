@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { XIcon } from '@phosphor-icons/react';
 import { useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../lib/utils.ts';
@@ -61,7 +61,7 @@ export function Toaster() {
             </button>
           )}
           <button aria-label="Dismiss" className="text-white/60 hover:text-white" onClick={() => dismiss(t.id)}>
-            <X size={14} />
+            <XIcon size={14} />
           </button>
         </div>
       ))}

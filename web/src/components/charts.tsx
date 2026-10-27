@@ -2,7 +2,7 @@
 // Marks follow one spec: thin bars (≤ 24px) with 4px rounded data-ends, hairline gridlines,
 // 2px gaps between touching marks, values in text colours (never the series colour),
 // a hover/focus tooltip on every mark, and a table view for every chart.
-import { ChartColumn, Table2 } from 'lucide-react';
+import { ChartBarIcon, TableIcon } from '@phosphor-icons/react';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../lib/utils.ts';
@@ -91,7 +91,7 @@ export function ChartCard({
             title={asTable ? 'Show chart' : 'Show as table'}
             className="flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1 text-xs text-ink-3 hover:bg-hover hover:text-ink-2"
           >
-            {asTable ? <ChartColumn size={14} /> : <Table2 size={14} />}
+            {asTable ? <ChartBarIcon size={14} /> : <TableIcon size={14} />}
             {asTable ? 'Chart' : 'Table'}
           </button>
         )}

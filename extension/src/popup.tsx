@@ -1,6 +1,15 @@
 import './dev-shim.ts';
 import './styles.css';
-import { Check, ChevronDown, CircleAlert, ExternalLink, Heart, LoaderCircle, Settings, Trash2 } from 'lucide-react';
+import {
+  ArrowSquareOutIcon,
+  CaretDownIcon,
+  CheckIcon,
+  CircleNotchIcon,
+  GearIcon,
+  HeartIcon,
+  TrashIcon,
+  WarningCircleIcon,
+} from '@phosphor-icons/react';
 import { StrictMode, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Bookmark, Sidebar } from '../../shared/types.ts';
@@ -85,7 +94,7 @@ function Popup() {
     return (
       <Shell>
         <div className="flex items-center justify-center gap-2 py-10 text-sm text-ink-2">
-          <LoaderCircle size={16} className="animate-spin" /> Saving…
+          <CircleNotchIcon size={16} className="animate-spin" /> Saving…
         </div>
       </Shell>
     );
@@ -168,7 +177,7 @@ function Shell({ children, onSettings, status }: { children: React.ReactNode; on
       <header className="flex h-12 items-center gap-2.5 border-b border-line pr-2 pl-3.5">
         <img src="icons/32.png" alt="" width={20} height={20} />
         <div className="min-w-0 flex-1 truncate text-[0.95rem] font-semibold">{status ?? 'Magpie'}</div>
-        {onSettings && <IconButton icon={Settings} label="Extension settings" onClick={onSettings} />}
+        {onSettings && <IconButton icon={GearIcon} label="Extension settings" onClick={onSettings} />}
       </header>
       {children}
     </div>
@@ -178,7 +187,7 @@ function Shell({ children, onSettings, status }: { children: React.ReactNode; on
 function Message({ title, body, error, children }: { title: string; body: string; error?: boolean; children?: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center px-6 py-7 text-center">
-      {error && <CircleAlert size={22} className="mb-2 text-danger" />}
+      {error && <WarningCircleIcon size={22} className="mb-2 text-danger" />}
       <h1 className="font-semibold">{title}</h1>
       <p className="mt-1 text-[0.85rem] text-ink-2">{body}</p>
       {children && <div className="mt-4 flex gap-2">{children}</div>}
@@ -264,12 +273,12 @@ function Editor({
   const status =
     saving === 'saving' ? (
       <span className="flex items-center gap-1.5 text-ink-2">
-        <LoaderCircle size={14} className="animate-spin" /> Saving…
+        <CircleNotchIcon size={14} className="animate-spin" /> Saving…
       </span>
     ) : (
       <span className="flex items-center gap-1.5">
         <span className="flex size-[18px] items-center justify-center rounded-full bg-[#30a46c] text-white">
-          <Check size={12} strokeWidth={3} />
+          <CheckIcon size={12} weight="bold" />
         </span>
         {existed ? 'Already in Magpie' : 'Saved to Magpie'}
       </span>
@@ -310,7 +319,7 @@ function Editor({
               <button type="button" {...p} className={cn(inputClass, 'flex w-full items-center gap-2 text-left')}>
                 {current ? <CollectionIcon collection={current} size={16} /> : <UnsortedIcon size={16} />}
                 <span className="flex-1 truncate">{current?.name ?? 'Unsorted'}</span>
-                <ChevronDown size={14} className="shrink-0 text-ink-3" />
+                <CaretDownIcon size={14} className="shrink-0 text-ink-3" />
               </button>
             )}
           >
@@ -350,15 +359,16 @@ function Editor({
         <Button
           variant="ghost"
           size="sm"
-          icon={Heart}
+          icon={HeartIcon}
+          filled={b.favorite}
           onClick={() => send({ favorite: !b.favorite })}
-          className={cn(b.favorite && 'text-[#e5484d] hover:text-[#e5484d] [&_svg]:fill-current')}
+          className={cn(b.favorite && 'text-[#e5484d] hover:text-[#e5484d]')}
         >
           {b.favorite ? 'Favorite' : 'Add to favorites'}
         </Button>
         <div className="flex-1" />
-        <IconButton icon={ExternalLink} label="Open in Magpie" onClick={onOpen} />
-        <IconButton icon={Trash2} label="Remove from Magpie" onClick={remove} className="hover:text-danger" />
+        <IconButton icon={ArrowSquareOutIcon} label="Open in Magpie" onClick={onOpen} />
+        <IconButton icon={TrashIcon} label="Remove from Magpie" onClick={remove} className="hover:text-danger" />
       </footer>
     </Shell>
   );

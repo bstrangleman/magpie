@@ -1,21 +1,21 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeft,
-  Bookmark,
-  Check,
-  Copy,
-  Download,
-  HardDriveDownload,
-  KeyRound,
-  PanelLeft,
-  ChartColumn,
-  Plug,
-  Plus,
-  Trash2,
-  Upload,
-  User,
-  type LucideIcon,
-} from 'lucide-react';
+  ArrowLeftIcon,
+  BookmarkSimpleIcon,
+  ChartBarIcon,
+  CheckIcon,
+  CopyIcon,
+  DownloadSimpleIcon,
+  HardDrivesIcon,
+  KeyIcon,
+  PlugIcon,
+  PlusIcon,
+  SidebarSimpleIcon,
+  TrashIcon,
+  UploadSimpleIcon,
+  UserIcon,
+  type Icon,
+} from '@phosphor-icons/react';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 import type { ApiKey, ImportResult, Me, Theme, UserSettings, ViewMode } from '../../../shared/types.ts';
@@ -27,13 +27,13 @@ import { qk, useBackups, useMe, useSaveSettings, useSettings } from '../lib/quer
 import { cn, formatBytes, longDate, plural } from '../lib/utils.ts';
 import { StatsPage } from './Stats.tsx';
 
-const SECTIONS: { path: string; label: string; icon: LucideIcon }[] = [
-  { path: 'app', label: 'App', icon: PanelLeft },
-  { path: 'account', label: 'Account', icon: User },
-  { path: 'stats', label: 'Statistics', icon: ChartColumn },
-  { path: 'import', label: 'Import', icon: Upload },
-  { path: 'integrations', label: 'Integrations', icon: Plug },
-  { path: 'backups', label: 'Backups', icon: HardDriveDownload },
+const SECTIONS: { path: string; label: string; icon: Icon }[] = [
+  { path: 'app', label: 'App', icon: SidebarSimpleIcon },
+  { path: 'account', label: 'Account', icon: UserIcon },
+  { path: 'stats', label: 'Statistics', icon: ChartBarIcon },
+  { path: 'import', label: 'Import', icon: UploadSimpleIcon },
+  { path: 'integrations', label: 'Integrations', icon: PlugIcon },
+  { path: 'backups', label: 'Backups', icon: HardDrivesIcon },
 ];
 
 export function SettingsLayout() {
@@ -49,7 +49,7 @@ export function SettingsLayout() {
       <aside className="sidebar-scope shrink-0 border-line bg-sidebar md:w-[17rem] md:border-r">
         <div className="p-3">
           <button onClick={() => navigate('/all')} aria-label="Back to bookmarks" className="flex size-8 items-center justify-center rounded-md text-ink-2 hover:bg-hover">
-            <ArrowLeft size={19} />
+            <ArrowLeftIcon size={19} />
           </button>
         </div>
         <div className="flex items-center gap-3 px-4 pb-4">
@@ -72,7 +72,7 @@ export function SettingsLayout() {
                 )
               }
             >
-              <s.icon size={18} strokeWidth={1.6} />
+              <s.icon size={18} />
               {s.label}
             </NavLink>
           ))}
@@ -388,7 +388,7 @@ function ImportSettings() {
           dragging && 'border-accent bg-accent-soft',
         )}
       >
-        <Upload size={24} className="text-ink-3" />
+        <UploadSimpleIcon size={24} className="text-ink-3" />
         {file ? (
           <span className="font-medium text-ink">
             {file.name} <span className="font-normal text-ink-3">({formatBytes(file.size)})</span>
@@ -407,7 +407,7 @@ function ImportSettings() {
         </Checkbox>
       </div>
       <div className="mt-4 flex items-center gap-3">
-        <Button variant="primary" icon={Upload} onClick={run} loading={busy} disabled={!file}>
+        <Button variant="primary" icon={UploadSimpleIcon} onClick={run} loading={busy} disabled={!file}>
           Import
         </Button>
       </div>
@@ -415,7 +415,7 @@ function ImportSettings() {
       {result && (
         <div className="mt-4 rounded-lg border border-line bg-field/50 p-4 text-sm">
           <p className="flex items-center gap-2 font-semibold">
-            <Check size={16} className="text-[#30a46c]" /> Imported {plural(result.created, 'bookmark')} from {result.format}
+            <CheckIcon size={16} className="text-[#30a46c]" /> Imported {plural(result.created, 'bookmark')} from {result.format}
           </p>
           <p className="mt-1 text-ink-2">
             {result.collections > 0 && `${plural(result.collections, 'new collection')}. `}
@@ -470,7 +470,7 @@ function IntegrationSettings() {
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
           <a href={`/api/extension.zip?browser=${firefox ? 'firefox' : 'chrome'}`} download className={buttonClass('primary')}>
-            <Download size={15} strokeWidth={1.9} /> Download for {firefox ? 'Firefox' : 'Chrome'}
+            <DownloadSimpleIcon size={15} /> Download for {firefox ? 'Firefox' : 'Chrome'}
           </a>
           <a href={`/api/extension.zip?browser=${firefox ? 'chrome' : 'firefox'}`} download className="font-medium text-accent hover:underline">
             {firefox ? 'Chrome, Edge, Brave or Arc version' : 'Firefox version'}
@@ -502,7 +502,7 @@ function IntegrationSettings() {
           }}
           className="mt-3 inline-flex h-8 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-semibold text-accent-ink"
         >
-          <Bookmark size={15} /> Save to Magpie
+          <BookmarkSimpleIcon size={15} /> Save to Magpie
         </a>
       </div>
       <ApiKeys />
@@ -564,9 +564,9 @@ function ApiKeys() {
       <h2 className="mt-8 mb-2 text-sm font-semibold">API keys</h2>
       <div className="divide-y divide-line rounded-lg border border-line">
         <form onSubmit={create} className="flex items-center gap-2 px-4 py-2.5">
-          <KeyRound size={16} className="shrink-0 text-ink-3" />
+          <KeyIcon size={16} className="shrink-0 text-ink-3" />
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Key name, e.g. “Raycast” or “iOS Shortcut”" className="flex-1" />
-          <Button type="submit" icon={Plus} disabled={!name.trim()}>
+          <Button type="submit" icon={PlusIcon} disabled={!name.trim()}>
             Create
           </Button>
         </form>
@@ -577,7 +577,7 @@ function ApiKeys() {
               <code className="min-w-0 flex-1 truncate rounded bg-surface px-2 py-1 font-mono text-xs">{created}</code>
               <Button
                 size="sm"
-                icon={Copy}
+                icon={CopyIcon}
                 onClick={() => navigator.clipboard.writeText(created).then(() => toast('Copied'), toastError)}
               >
                 Copy
@@ -602,7 +602,7 @@ function ApiKeys() {
             <Button
               size="sm"
               variant="ghost"
-              icon={Trash2}
+              icon={TrashIcon}
               className="hover:text-danger"
               onClick={() => api.del(`/keys/${k.id}`).then(() => qc.invalidateQueries({ queryKey: qk.keys }), toastError)}
             >
@@ -655,7 +655,7 @@ function BackupSettings() {
       </div>
       <div className="mt-4 divide-y divide-line rounded-lg border border-line">
         <button onClick={create} disabled={creating} className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-hover">
-          {creating ? <Spinner size={16} /> : <Plus size={16} className="text-ink-2" />}
+          {creating ? <Spinner size={16} /> : <PlusIcon size={16} className="text-ink-2" />}
           Create new
         </button>
         {isLoading && (
@@ -665,7 +665,7 @@ function BackupSettings() {
         )}
         {backups?.map((b) => (
           <div key={b.id} className="group flex items-center gap-3 px-4 py-2 text-sm">
-            <Check size={15} className="shrink-0 text-ink-2" />
+            <CheckIcon size={15} className="shrink-0 text-ink-2" />
             <div className="min-w-0 flex-1">
               <span>{longDate(b.createdAt)}</span>
               <span className="ml-2 text-xs text-ink-3">
@@ -675,7 +675,7 @@ function BackupSettings() {
             </div>
             {(['html', 'csv', 'json'] as const).map((f) => (
               <a key={f} href={`/api/backups/${b.id}/download?format=${f}`} download className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[0.8rem] text-ink-2 hover:bg-hover hover:text-ink">
-                <Download size={13} /> {f.toUpperCase()}
+                <DownloadSimpleIcon size={13} /> {f.toUpperCase()}
               </a>
             ))}
             <button
@@ -683,7 +683,7 @@ function BackupSettings() {
               onClick={() => api.del(`/backups/${b.id}`).then(() => qc.invalidateQueries({ queryKey: qk.backups }), toastError)}
               className="invisible rounded p-1 text-ink-3 group-hover:visible hover:text-danger"
             >
-              <Trash2 size={14} />
+              <TrashIcon size={14} />
             </button>
           </div>
         ))}
@@ -698,7 +698,7 @@ function BackupSettings() {
       <div className="flex flex-wrap gap-2">
         {(['html', 'csv', 'json'] as const).map((f) => (
           <a key={f} href={`/api/export?format=${f}`} download className={buttonClass()}>
-            <Download size={15} strokeWidth={1.9} />
+            <DownloadSimpleIcon size={15} />
             {f === 'html' ? 'HTML (browser bookmarks)' : f.toUpperCase()}
           </a>
         ))}

@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, CircleAlert, Search, Upload } from 'lucide-react';
+import { CaretDownIcon, MagnifyingGlassIcon, UploadSimpleIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { PHOSPHOR_PREFIX, phosphorName, type Bookmark, type Collection } from '../../../shared/types.ts';
 import { api, errorMessage } from '../lib/api.ts';
@@ -25,7 +25,7 @@ export function CollectionSelect({ value, onChange }: { value: number | null; on
         >
           {current ? <CollectionIcon collection={current} size={16} /> : <span className="text-base leading-none">📥</span>}
           <span className="flex-1 truncate">{current?.name ?? 'Unsorted'}</span>
-          <ChevronDown size={14} className="text-ink-3" />
+          <CaretDownIcon size={14} className="text-ink-3" />
         </button>
       )}
     >
@@ -115,7 +115,7 @@ export function AddLinkDialog({ initialUrl = '' }: { initialUrl?: string }) {
         </Field>
         {existing && (
           <div className="flex items-start gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm">
-            <CircleAlert size={16} className="mt-0.5 shrink-0 text-accent" />
+            <WarningCircleIcon size={16} className="mt-0.5 shrink-0 text-accent" />
             <div className="flex-1">
               Already saved in <b>{existingIn}</b>.{' '}
               <button
@@ -279,7 +279,7 @@ export function UploadDialog({ initialFiles = [] }: { initialFiles?: File[] }) {
             dragging && 'border-accent bg-accent-soft',
           )}
         >
-          <Upload size={22} className="text-ink-3" />
+          <UploadSimpleIcon size={22} className="text-ink-3" />
           Drop images, PDFs or other files here, or click to choose
         </button>
         <input ref={input} type="file" multiple hidden onChange={(e) => setFiles([...files, ...(e.target.files ?? [])])} />
@@ -333,7 +333,7 @@ function IconPicker({ value, color, onChange }: { value: string | null; color: s
   return (
     <div className="overflow-hidden rounded-md border border-line">
       <label className="flex items-center gap-2 border-b border-line px-2.5">
-        <Search size={14} className="shrink-0 text-ink-3" />
+        <MagnifyingGlassIcon size={14} className="shrink-0 text-ink-3" />
         <input
           type="search"
           value={query}

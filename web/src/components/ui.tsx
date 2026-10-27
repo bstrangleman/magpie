@@ -1,4 +1,4 @@
-import { Check, LoaderCircle, X, type LucideIcon } from 'lucide-react';
+import { CheckIcon, CircleNotchIcon, XIcon, type Icon } from '@phosphor-icons/react';
 import {
   forwardRef,
   useEffect,
@@ -19,7 +19,9 @@ import { cn } from '../lib/utils.ts';
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
   size?: 'sm' | 'md';
-  icon?: LucideIcon;
+  icon?: Icon;
+  /** Show the icon solid, e.g. a favorite's heart. */
+  filled?: boolean;
   loading?: boolean;
 };
 
@@ -36,21 +38,28 @@ export function buttonClass(variant: ButtonProps['variant'] = 'secondary', size:
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'secondary', size = 'md', icon: Icon, loading, className, children, disabled, ...rest },
+  { variant = 'secondary', size = 'md', icon: Icon, filled, loading, className, children, disabled, ...rest },
   ref,
 ) {
   return (
     <button ref={ref} disabled={disabled || loading} className={cn(buttonClass(variant, size), className)} {...rest}>
-      {loading ? <LoaderCircle size={15} className="animate-spin" /> : Icon && <Icon size={15} strokeWidth={1.9} />}
+      {loading ? <CircleNotchIcon size={15} className="animate-spin" /> : Icon && <Icon size={15} weight={filled ? 'fill' : 'regular'} />}
       {children}
     </button>
   );
 });
 
-type IconButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { icon: LucideIcon; label: string; size?: number; active?: boolean };
+type IconButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  icon: Icon;
+  label: string;
+  size?: number;
+  active?: boolean;
+  /** Show the icon solid, e.g. a favorite's heart. */
+  filled?: boolean;
+};
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
-  { icon: Icon, label, size = 16, active, className, ...rest },
+  { icon: Icon, label, size = 16, active, filled, className, ...rest },
   ref,
 ) {
   return (
@@ -65,13 +74,13 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
       )}
       {...rest}
     >
-      <Icon size={size} strokeWidth={1.8} />
+      <Icon size={size} weight={filled ? 'fill' : 'regular'} />
     </button>
   );
 });
 
 export const Spinner = ({ size = 16, className }: { size?: number; className?: string }) => (
-  <LoaderCircle size={size} className={cn('animate-spin text-ink-3', className)} />
+  <CircleNotchIcon size={size} className={cn('animate-spin text-ink-3', className)} />
 );
 
 // --- Floating layer (menus, popovers, context menus) ---------------------------------
@@ -202,7 +211,7 @@ export function MenuItem({
   hint,
   iconColor,
 }: {
-  icon?: LucideIcon;
+  icon?: Icon;
   children: ReactNode;
   onClick?: () => void;
   checked?: boolean;
@@ -221,9 +230,9 @@ export function MenuItem({
       )}
     >
       {checked !== undefined && (
-        <span className="flex w-3.5 justify-center text-accent">{checked && <Check size={14} strokeWidth={2.4} />}</span>
+        <span className="flex w-3.5 justify-center text-accent">{checked && <CheckIcon size={14} weight="bold" />}</span>
       )}
-      {Icon && <Icon size={16} strokeWidth={1.8} className={cn('shrink-0', !danger && 'text-ink-2')} style={iconColor ? { color: iconColor } : undefined} />}
+      {Icon && <Icon size={16} className={cn('shrink-0', !danger && 'text-ink-2')} style={iconColor ? { color: iconColor } : undefined} />}
       <span className="min-w-0 flex-1 truncate">{children}</span>
       {hint && <span className="text-xs text-ink-3">{hint}</span>}
     </button>
@@ -260,7 +269,7 @@ export function Modal({
       <div role="dialog" aria-modal className={cn('shadow-pop animate-pop w-full rounded-xl border border-line bg-elevated text-ink', width)}>
         <div className="flex items-center justify-between px-5 pt-4 pb-2">
           <h2 className="text-base font-semibold">{title}</h2>
-          <IconButton icon={X} label="Close" onClick={onClose} className="-mr-2" />
+          <IconButton icon={XIcon} label="Close" onClick={onClose} className="-mr-2" />
         </div>
         <div className="px-5 pb-4">{children}</div>
         {footer && <div className="flex justify-end gap-2 border-t border-line px-5 py-3">{footer}</div>}

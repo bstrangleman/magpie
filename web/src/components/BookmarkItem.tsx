@@ -1,4 +1,14 @@
-import { Check, Eye, FileText, Ghost, Heart, Pencil, RotateCcw, StickyNote, Trash2 } from 'lucide-react';
+import {
+  ArrowCounterClockwiseIcon,
+  CheckIcon,
+  EyeIcon,
+  FileTextIcon,
+  GhostIcon,
+  HeartIcon,
+  NoteIcon,
+  PencilSimpleIcon,
+  TrashIcon,
+} from '@phosphor-icons/react';
 import type { MouseEvent, ReactNode } from 'react';
 import type { Bookmark, Collection, ViewMode } from '../../../shared/types.ts';
 import { useBulk, useSettings, useUpdateBookmark } from '../lib/queries.ts';
@@ -171,14 +181,14 @@ function Cover({ b, className, natural }: { b: Bookmark; className?: string; nat
   }
   return (
     <div className={cn('flex items-center justify-center border-b border-line bg-field', className)}>
-      {b.file ? <FileText size={30} strokeWidth={1.4} className="text-ink-3" /> : <Favicon src={b.favicon} size={28} />}
+      {b.file ? <FileTextIcon size={30} className="text-ink-3" /> : <Favicon src={b.favicon} size={28} />}
     </div>
   );
 }
 
 function TypeIcon({ b }: { b: Bookmark }) {
-  if (b.type === 'note') return <StickyNote size={16} className="shrink-0 text-[#e2a336]" />;
-  if (b.file) return <FileText size={16} className="shrink-0 text-ink-3" />;
+  if (b.type === 'note') return <NoteIcon size={16} className="shrink-0 text-[#e2a336]" />;
+  if (b.file) return <FileTextIcon size={16} className="shrink-0 text-ink-3" />;
   return <Favicon src={b.favicon} size={16} />;
 }
 
@@ -188,10 +198,10 @@ function StatusIcons({ b }: { b: Bookmark }) {
       {b.fetchStatus === 'pending' && <Spinner size={12} />}
       {b.broken && (
         <span title="This link appears to be broken">
-          <Ghost size={13} className="text-danger" />
+          <GhostIcon size={13} className="text-danger" />
         </span>
       )}
-      {b.favorite && <Heart size={12} className="fill-[#e5484d] text-[#e5484d]" />}
+      {b.favorite && <HeartIcon size={12} weight="fill" className="text-[#e5484d]" />}
     </>
   );
 }
@@ -208,7 +218,7 @@ function Meta({ b, collection }: ItemProps) {
   }
   parts.push(
     <span key="s" className="flex min-w-0 items-center gap-1">
-      {b.type === 'note' ? <StickyNote size={12} className="text-[#e2a336]" /> : <Favicon src={b.favicon} size={13} />}
+      {b.type === 'note' ? <NoteIcon size={12} className="text-[#e2a336]" /> : <Favicon src={b.favicon} size={13} />}
       <span className="truncate">{b.type === 'note' ? 'Note' : b.file ? b.file.name : b.site}</span>
     </span>,
   );
@@ -255,7 +265,7 @@ function SelectBox({ selected, selecting, onClick, className }: { selected: bool
         className,
       )}
     >
-      {selected && <Check size={12} strokeWidth={3} />}
+      {selected && <CheckIcon size={12} weight="bold" />}
     </button>
   );
 }
@@ -278,7 +288,7 @@ function Actions({ b, className }: { b: Bookmark; className?: string }) {
         title="Restore"
         onClick={stop(() => bulk.mutate({ ids: [b.id], action: 'restore' }, { onSuccess: () => toast('Restored'), onError: toastError }))}
       >
-        <RotateCcw size={15} />
+        <ArrowCounterClockwiseIcon size={15} />
       </button>
       <button
         className={cn(btn, 'hover:text-danger')}
@@ -294,25 +304,25 @@ function Actions({ b, className }: { b: Bookmark; className?: string }) {
           ),
         )}
       >
-        <Trash2 size={15} />
+        <TrashIcon size={15} />
       </button>
     </>
   ) : (
     <>
       {canPreview(b) && (
         <button className={btn} title="Preview" onClick={stop(() => setPanel({ kind: 'preview', id: b.id }))}>
-          <Eye size={15} />
+          <EyeIcon size={15} />
         </button>
       )}
       <button className={btn} title="Edit" onClick={stop(() => setPanel({ kind: 'edit', id: b.id }))}>
-        <Pencil size={15} />
+        <PencilSimpleIcon size={15} />
       </button>
       <button
         className={cn(btn, b.favorite && 'text-[#e5484d] hover:text-[#e5484d]')}
         title={b.favorite ? 'Remove from favorites' : 'Add to favorites'}
         onClick={stop(() => update.mutate({ id: b.id, patch: { favorite: !b.favorite } }, { onError: toastError }))}
       >
-        <Heart size={15} className={cn(b.favorite && 'fill-current')} />
+        <HeartIcon size={15} weight={b.favorite ? 'fill' : 'regular'} />
       </button>
       <button
         className={cn(btn, 'hover:text-danger')}
@@ -327,7 +337,7 @@ function Actions({ b, className }: { b: Bookmark; className?: string }) {
           ),
         )}
       >
-        <Trash2 size={15} />
+        <TrashIcon size={15} />
       </button>
     </>
   );

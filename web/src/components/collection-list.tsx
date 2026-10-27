@@ -1,6 +1,6 @@
 // Collection icons and the searchable collection list. Kept free of the web app's data layer
 // (React Query), so the browser extension's popup can use them with its own sidebar data.
-import { Folder, Inbox, Search } from 'lucide-react';
+import { FolderIcon, MagnifyingGlassIcon, TrayIcon } from '@phosphor-icons/react';
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { phosphorName, type Collection, type Sidebar } from '../../../shared/types.ts';
 import { usePhosphor } from '../lib/phosphor.ts';
@@ -28,11 +28,11 @@ export function CollectionIcon({ collection, size = 18 }: { collection: Pick<Col
       </span>
     );
   }
-  return <Folder size={size} strokeWidth={1.6} className="shrink-0 text-ink-2" style={collection.color ? { color: collection.color } : undefined} />;
+  return <FolderIcon size={size} className="shrink-0 text-ink-2" style={collection.color ? { color: collection.color } : undefined} />;
 }
 
 /** The Unsorted "collection" (no collection), as shown in pickers. */
-export const UnsortedIcon = ({ size = 17 }: { size?: number }) => <Inbox size={size} strokeWidth={1.6} className="shrink-0 text-ink-2" />;
+export const UnsortedIcon = ({ size = 17 }: { size?: number }) => <TrayIcon size={size} className="shrink-0 text-ink-2" />;
 
 export interface CollectionListProps {
   /** Groups and collections to list; nothing is shown until they've loaded. */
@@ -54,7 +54,7 @@ export function CollectionList({ sidebar, value, onPick, exclude, allowUnsorted 
     // Shrinks to fit a short popover (min-h-0), so only the list below scrolls.
     <div className="flex min-h-0 w-72 flex-col">
       <div className="relative shrink-0 px-2 pt-1 pb-1.5">
-        <Search size={14} className="absolute top-3 left-4 text-ink-3" />
+        <MagnifyingGlassIcon size={14} className="absolute top-3 left-4 text-ink-3" />
         <input
           autoFocus
           value={filter}
