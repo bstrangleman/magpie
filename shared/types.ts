@@ -171,6 +171,41 @@ export interface Backup {
   automatic: boolean;
 }
 
+export const CLOUD_KINDS = ['none', 's3', 'webdav'] as const;
+export type CloudKind = (typeof CLOUD_KINDS)[number];
+
+/** Where the server copies backups to, off the machine. Set by the administrator; the secret is never sent back. */
+export interface CloudBackup {
+  kind: CloudKind;
+  /** S3: the storage endpoint, e.g. "https://s3.example.com". WebDAV: the folder's URL. */
+  url: string;
+  /** S3 only. */
+  bucket: string;
+  region: string;
+  /** S3 only: an optional folder inside the bucket. */
+  prefix: string;
+  /** S3: the access key ID. WebDAV: the username. */
+  user: string;
+  hasSecret: boolean;
+  /** Also copy the daily database snapshot (every account). */
+  includeDatabase: boolean;
+  status: CloudStatus;
+}
+
+export interface CloudStatus {
+  /** When every backup was last known to be copied. */
+  lastSuccessAt: number | null;
+  /** Why the last attempt failed, or null if it worked. */
+  error: string | null;
+  /** Backup files currently at the destination. */
+  files: number;
+}
+
+export type CloudBackupInput = Omit<CloudBackup, 'hasSecret' | 'status'> & {
+  /** S3: the secret access key. WebDAV: the password. Leave out to keep the stored one. */
+  secret?: string;
+};
+
 export interface ImportResult {
   format: string;
   created: number;

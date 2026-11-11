@@ -9,6 +9,7 @@ import {
 import type {
   AuthStatus,
   Backup,
+  CloudBackup,
   Bookmark,
   BookmarkContent,
   BookmarkPage,
@@ -34,6 +35,7 @@ export const qk = {
   bookmark: (id: number) => ['bookmark', id] as const,
   content: (id: number) => ['content', id] as const,
   backups: ['backups'] as const,
+  cloudBackup: ['cloud-backup'] as const,
   keys: ['keys'] as const,
 };
 
@@ -187,6 +189,9 @@ export function useViewPrefs(view: View, searching: boolean) {
 }
 
 export const useBackups = () => useQuery({ queryKey: qk.backups, queryFn: () => api.get<Backup[]>('/backups') });
+
+/** The cloud destination for backups (administrator only). */
+export const useCloudBackup = (enabled: boolean) => useQuery({ queryKey: qk.cloudBackup, queryFn: () => api.get<CloudBackup>('/cloud-backup'), enabled });
 
 /** Usage statistics, bucketed by the viewer's time zone. */
 export const useStats = () =>

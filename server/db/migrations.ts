@@ -160,4 +160,17 @@ export const migrations: string[] = [
   UPDATE bookmarks SET title = '', fetch_status = 'pending'
   WHERE title = 'Instagram' AND (site = 'instagram.com' OR site LIKE '%.instagram.com') AND file_asset_id IS NULL;
   `,
+
+  /* sql */ `
+  -- Server-wide settings set by the administrator (the cloud backup destination), one JSON value per key.
+  CREATE TABLE server_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL) WITHOUT ROWID;
+
+  -- Backup files copied to the cloud destination, by their path inside the backups folder.
+  -- remove = 1 once the local file was deleted and the remote copy should follow.
+  CREATE TABLE cloud_uploads (
+    path        TEXT PRIMARY KEY,
+    uploaded_at INTEGER NOT NULL,
+    remove      INTEGER NOT NULL DEFAULT 0
+  ) WITHOUT ROWID;
+  `,
 ];

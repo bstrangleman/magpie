@@ -20,7 +20,7 @@ It runs as **one Node process with one SQLite file**. There's no separate search
 - **Trash.** Deleted bookmarks can be restored or deleted permanently.
 - **Import.** Accepts browser HTML (Chrome, Firefox, Safari, Edge), HTML and JSON exports from other bookmark managers, Pocket/Instapaper-style CSV, and Magpie JSON. Folders become collections, and duplicates can be skipped.
 - **Export.** HTML (Netscape bookmark format), CSV or JSON, for everything or a single collection.
-- **Backups.** A daily backup of each account's bookmarks, collections, notes and tags whenever something changed (the last 14 are kept), plus on-demand backups. Each one downloads as HTML, CSV or JSON. The server also keeps a daily copy of the whole database, and another before applying an update that changes it.
+- **Backups.** A daily backup of each account's bookmarks, collections, notes and tags whenever something changed (the last 14 are kept), plus on-demand backups. Each one downloads as HTML, CSV or JSON. The server also keeps a daily copy of the whole database, and another before applying an update that changes it. The administrator can have all of these copied to S3-compatible storage or a WebDAV folder ([cloud copies](#cloud-copies)).
 - **Browser extension.** Works in Chrome, Edge, Brave, Arc and Firefox. One click saves the current page, and you can then set its collection, tags and note from the popup. Right-click saves links, images, or selected text as a note. There's also a keyboard shortcut. See [below](#browser-extension).
 - **Bookmarklet.** Saves the current page from any browser, with nothing to install.
 - **REST API.** Uses personal API keys (`Authorization: Bearer mp_…`).
@@ -46,9 +46,26 @@ AI tagging/summaries, RSS feeds, mobile apps (the API and bookmarklet cover most
 docker compose up -d
 ```
 
-Open http://localhost:3000 and create your account. The first account is the administrator. Data lives in `./data`: `magpie.db`, uploaded files and cached preview images in `assets/`, and backups in `backups/` (database copies in `backups/database/`). Backups on the same disk don't protect against losing that disk, so copy the whole data folder somewhere else from time to time.
+Open http://localhost:3000 and create your account. The first account is the administrator. Data lives in `./data`: `magpie.db`, uploaded files and cached preview images in `assets/`, and backups in `backups/` (database copies in `backups/database/`). Backups on the same disk don't protect against losing that disk, so turn on [cloud copies](#cloud-copies), or copy the whole data folder somewhere else from time to time.
 
 Once you've signed up, set `DISABLE_SIGNUPS: "true"` in `docker-compose.yml` and run `docker compose up -d` again.
+
+## Cloud copies
+
+The administrator can set a destination under Settings → Backups → Cloud copy, and the server then copies backups there:
+
+- **S3-compatible storage**: any service with an S3 API, or your own server. Enter its endpoint, bucket, region and an access key that may write to the bucket.
+- **WebDAV**: a folder on a NAS or a file-sync server. Enter the folder's address, a username and a password (an app password, if the server offers them).
+
+Saving writes and removes a small test file, so a wrong address or key shows up straight away. After that:
+
+- Every account's backups are copied as soon as they're made, and the newest daily database copy once a day. Files keep the names they have in `backups/`: `<account id>/magpie-….json` and `database/magpie-….db`.
+- A failed copy is shown in Settings and retried every hour.
+- A copy is deleted only after its backup was deleted on the server, by you or by `BACKUP_RETENTION`. Copies are never deleted because a file is missing locally, so restoring or reinstalling the server leaves them alone.
+- Uploaded files (`assets/`) aren't copied.
+- The storage key is kept in the database, and so in the database copies. Use a key that can only reach the backup bucket or folder.
+
+To restore everything, put a database copy back as `magpie.db` in an empty data folder. To restore one account's bookmarks, import its JSON backup under Settings → Import.
 
 ## Unraid
 
@@ -234,3 +251,4 @@ curl -X POST http://localhost:3000/api/bookmarks \
 | `POST /api/import`                                               | Multipart import (`file`, `skipDuplicates`, `fetchMetadata`)                                                                 |
 | `GET /api/export?format=html\|csv\|json&collection=`             | Export                                                                                                                       |
 | `GET/POST /api/backups`, `GET /api/backups/:id/download?format=` | Backups                                                                                                                      |
+| `GET/POST /api/cloud-backup`, `POST /api/cloud-backup/sync`      | Administrator only: the cloud destination for backups, and copy to it now                                                    |

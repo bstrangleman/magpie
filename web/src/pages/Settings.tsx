@@ -4,6 +4,7 @@ import {
   BookmarkSimpleIcon,
   ChartBarIcon,
   CheckIcon,
+  CloudArrowUpIcon,
   CopyIcon,
   DownloadSimpleIcon,
   HardDrivesIcon,
@@ -14,16 +15,17 @@ import {
   TrashIcon,
   UploadSimpleIcon,
   UserIcon,
+  WarningIcon,
   type Icon,
 } from '@phosphor-icons/react';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate, useParams } from 'react-router';
-import type { ApiKey, ImportResult, Me, Theme, UserSettings, ViewMode } from '../../../shared/types.ts';
+import type { ApiKey, CloudBackup, CloudBackupInput, CloudKind, ImportResult, Me, Theme, UserSettings, ViewMode } from '../../../shared/types.ts';
 import { Avatar } from '../components/common.tsx';
 import { toast, toastError } from '../components/toast.tsx';
-import { Button, buttonClass, Checkbox, ErrorText, Input, Select, Spinner } from '../components/ui.tsx';
+import { Button, buttonClass, Checkbox, ErrorText, Field, Input, Select, Spinner } from '../components/ui.tsx';
 import { api, errorMessage } from '../lib/api.ts';
-import { qk, useBackups, useMe, useSaveSettings, useSettings } from '../lib/queries.ts';
+import { qk, useBackups, useCloudBackup, useMe, useSaveSettings, useSettings } from '../lib/queries.ts';
 import { cn, formatBytes, longDate, plural } from '../lib/utils.ts';
 import { StatsPage } from './Stats.tsx';
 
@@ -703,6 +705,150 @@ function BackupSettings() {
           </a>
         ))}
       </div>
+      {isAdmin && <CloudBackupSettings />}
     </>
+  );
+}
+
+const CLOUD_KINDS: { value: CloudKind; label: string }[] = [
+  { value: 'none', label: 'Off' },
+  { value: 's3', label: 'S3-compatible storage' },
+  { value: 'webdav', label: 'WebDAV' },
+];
+
+type CloudForm = Required<CloudBackupInput>;
+
+const cloudForm = (c: CloudBackup): CloudForm => ({
+  kind: c.kind,
+  url: c.url,
+  bucket: c.bucket,
+  region: c.region,
+  prefix: c.prefix,
+  user: c.user,
+  secret: '',
+  includeDatabase: c.includeDatabase,
+});
+
+/** Copies of the backups on storage away from the server. Server-wide, so only the administrator sees it. */
+function CloudBackupSettings() {
+  const qc = useQueryClient();
+  const { data: saved } = useCloudBackup(true);
+  const [form, setForm] = useState<CloudForm | null>(null);
+  const [busy, setBusy] = useState<'save' | 'sync' | null>(null);
+  useEffect(() => {
+    if (saved) setForm((f) => f ?? cloudForm(saved));
+  }, [saved]);
+  if (!saved || !form) return null;
+
+  const set = (patch: Partial<CloudForm>) => setForm({ ...form, ...patch });
+  const text = (key: 'url' | 'bucket' | 'region' | 'prefix' | 'user' | 'secret') => ({
+    value: form[key],
+    onChange: (e: { target: { value: string } }) => set({ [key]: e.target.value }),
+    spellCheck: false,
+    autoComplete: 'off',
+  });
+  const s3 = form.kind === 's3';
+  const keepSecret = saved.hasSecret && saved.kind === form.kind;
+
+  const send = async (action: 'save' | 'sync') => {
+    setBusy(action);
+    try {
+      const { secret, ...rest } = form;
+      const next = action === 'save' ? await api.post<CloudBackup>('/cloud-backup', secret ? form : rest) : await api.post<CloudBackup>('/cloud-backup/sync');
+      qc.setQueryData(qk.cloudBackup, next);
+      if (action === 'save') setForm(cloudForm(next));
+      if (next.kind === 'none') toast('Cloud copies turned off');
+      else if (!next.status.error) toast(action === 'save' ? 'Saved. Backups are copied to the cloud.' : 'Backups copied');
+    } catch (err) {
+      toastError(err);
+    }
+    setBusy(null);
+  };
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    void send('save');
+  };
+
+  return (
+    <form onSubmit={submit} className="mt-8">
+      <h2 className="mb-1 text-sm font-semibold">Cloud copy</h2>
+      <p className="mb-3 text-sm text-ink-2">
+        Copy every backup to storage away from this server, so a failed disk doesn’t take the backups with it. This covers every account’s backups; uploaded
+        files aren’t included.
+      </p>
+      <div className="max-w-xl space-y-3">
+        <Field label="Copy backups to">
+          <Select value={form.kind} onChange={(kind) => set({ kind })} options={CLOUD_KINDS} />
+        </Field>
+        {form.kind !== 'none' && (
+          <>
+            <Field
+              label={s3 ? 'Endpoint' : 'Folder address'}
+              hint={s3 ? 'The address your storage provider gives for its S3 API.' : 'The WebDAV address of the folder to copy into.'}
+            >
+              <Input {...text('url')} type="url" required placeholder={s3 ? 'https://s3.example.com' : 'https://cloud.example.com/dav/files/me/Magpie'} />
+            </Field>
+            {s3 && (
+              <>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Field label="Bucket">
+                    <Input {...text('bucket')} required />
+                  </Field>
+                  <Field label="Region">
+                    <Input {...text('region')} placeholder="us-east-1" />
+                  </Field>
+                </div>
+                <Field label="Folder in the bucket (optional)">
+                  <Input {...text('prefix')} placeholder="magpie" />
+                </Field>
+              </>
+            )}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label={s3 ? 'Access key ID' : 'Username'}>
+                <Input {...text('user')} required />
+              </Field>
+              <Field label={s3 ? 'Secret access key' : 'Password'}>
+                <Input {...text('secret')} type="password" autoComplete="new-password" required={!keepSecret} placeholder={keepSecret ? 'Saved. Leave empty to keep it.' : ''} />
+              </Field>
+            </div>
+            <Checkbox checked={form.includeDatabase} onChange={(includeDatabase) => set({ includeDatabase })}>
+              Also copy the daily database copy (every account, including saved page text)
+            </Checkbox>
+          </>
+        )}
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <Button type="submit" variant="primary" loading={busy === 'save'} disabled={!!busy}>
+            {form.kind === 'none' ? 'Save' : 'Save and test'}
+          </Button>
+          {saved.kind !== 'none' && (
+            <Button type="button" icon={CloudArrowUpIcon} loading={busy === 'sync'} disabled={!!busy} onClick={() => send('sync')}>
+              Copy now
+            </Button>
+          )}
+        </div>
+        {saved.kind !== 'none' && <CloudStatusLine status={saved.status} />}
+      </div>
+    </form>
+  );
+}
+
+function CloudStatusLine({ status }: { status: CloudBackup['status'] }) {
+  const last = status.lastSuccessAt ? `Last copied ${longDate(status.lastSuccessAt)}` : 'Nothing copied yet';
+  if (status.error) {
+    return (
+      <div role="alert" className="rounded-md bg-danger/10 px-2.5 py-1.5 text-sm text-danger">
+        <p className="flex items-start gap-1.5">
+          <WarningIcon size={15} className="mt-0.5 shrink-0" />
+          <span>{status.error}</span>
+        </p>
+        <p className="mt-0.5 pl-[1.3rem] text-xs opacity-80">{last}. Magpie tries again every hour.</p>
+      </div>
+    );
+  }
+  return (
+    <p className="flex items-center gap-1.5 text-sm text-ink-2">
+      <CheckIcon size={15} className="shrink-0" />
+      {last} · {plural(status.files, 'file')} at the destination
+    </p>
   );
 }

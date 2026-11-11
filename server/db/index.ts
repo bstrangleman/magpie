@@ -77,15 +77,17 @@ function writeSnapshot(conn: DatabaseSync, file: string) {
   fs.renameSync(tmp, file);
 }
 
-/** Keep the newest `keep` files in `dir` whose names match `pattern` (names sort by their timestamp). */
-export function pruneFiles(dir: string, pattern: RegExp, keep: number) {
-  if (!fs.existsSync(dir)) return;
+/** Keep the newest `keep` files in `dir` whose names match `pattern` (names sort by their timestamp). Returns the names removed. */
+export function pruneFiles(dir: string, pattern: RegExp, keep: number): string[] {
+  if (!fs.existsSync(dir)) return [];
   const files = fs
     .readdirSync(dir)
     .filter((f) => pattern.test(f) && !f.endsWith('.partial'))
     .sort()
     .reverse();
-  for (const f of files.slice(Math.max(keep, 0))) fs.rmSync(path.join(dir, f), { force: true });
+  const removed = files.slice(Math.max(keep, 0));
+  for (const f of removed) fs.rmSync(path.join(dir, f), { force: true });
+  return removed;
 }
 
 /** Snapshot the open database to `file`. Returns false for an in-memory database. */

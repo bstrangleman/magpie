@@ -1,11 +1,14 @@
 import fs from 'node:fs';
 import { Readable } from 'node:stream';
 import { Hono } from 'hono';
+import { z } from 'zod';
+import { CLOUD_KINDS } from '../../shared/types.ts';
 import { bodyLimit } from 'hono/body-limit';
 import type { AppEnv } from '../lib/auth.ts';
-import { badRequest, intParam, notFound } from '../lib/http.ts';
+import { badRequest, forbidden, intParam, notFound, parse } from '../lib/http.ts';
 import { assetPath, getAsset, isInlineSafe } from '../services/assets.ts';
 import { createBackup, deleteBackup, listBackups, readBackup } from '../services/backups.ts';
+import { getCloudBackup, saveCloudBackup, syncCloud } from '../services/cloud.ts';
 import { getCollection } from '../services/collections.ts';
 import { buildExport, importBookmarks, parseImport, toCsv, toNetscape, type ExportData } from '../services/io.ts';
 
@@ -23,6 +26,23 @@ function formatOf(value: string | undefined) {
 
 const slug = (s: string) => s.replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'bookmarks';
 const stamp = (t: number) => new Date(t).toISOString().slice(0, 10);
+
+const cloudBackup = z.object({
+  kind: z.enum(CLOUD_KINDS),
+  url: z.string().max(500).default(''),
+  bucket: z.string().max(200).default(''),
+  region: z.string().max(100).default(''),
+  prefix: z.string().max(300).default(''),
+  user: z.string().max(300).default(''),
+  secret: z.string().max(500).optional(),
+  includeDatabase: z.boolean().default(true),
+});
+
+/** The cloud destination holds every account's backups, so only the administrator may see or change it. */
+function requireAdmin(user: { isAdmin: boolean }) {
+  if (!user.isAdmin) throw forbidden('Only the administrator can do that');
+}
+
 const download = (name: string) => `attachment; filename="${name}"`;
 
 export const ioRoutes = new Hono<AppEnv>()
@@ -55,7 +75,11 @@ export const ioRoutes = new Hono<AppEnv>()
     });
   })
   .get('/backups', (c) => c.json(listBackups(c.var.user.id)))
-  .post('/backups', (c) => c.json(createBackup(c.var.user.id), 201))
+  .post('/backups', (c) => {
+    const backup = createBackup(c.var.user.id);
+    void syncCloud();
+    return c.json(backup, 201);
+  })
   .get('/backups/:id/download', (c) => {
     const format = formatOf(c.req.query('format'));
     const { data, createdAt } = readBackup(c.var.user.id, intParam(c.req.param('id')));
@@ -66,7 +90,21 @@ export const ioRoutes = new Hono<AppEnv>()
   })
   .delete('/backups/:id', (c) => {
     deleteBackup(c.var.user.id, intParam(c.req.param('id')));
+    void syncCloud();
     return c.json({ ok: true });
+  })
+  .get('/cloud-backup', (c) => {
+    requireAdmin(c.var.user);
+    return c.json(getCloudBackup());
+  })
+  .post('/cloud-backup', async (c) => {
+    requireAdmin(c.var.user);
+    return c.json(await saveCloudBackup(parse(cloudBackup, await c.req.json())));
+  })
+  .post('/cloud-backup/sync', async (c) => {
+    requireAdmin(c.var.user);
+    await syncCloud();
+    return c.json(getCloudBackup());
   })
   .get('/assets/:id', (c) => {
     const asset = getAsset(c.var.user.id, intParam(c.req.param('id')));

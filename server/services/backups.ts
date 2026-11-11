@@ -5,6 +5,7 @@ import type { Backup } from '../../shared/types.ts';
 import { config } from '../config.ts';
 import { all, get, now, pruneFiles, run, snapshotDb, snapshotDir } from '../db/index.ts';
 import { notFound } from '../lib/http.ts';
+import { forgetUpload } from './cloud.ts';
 import { buildExport, type ExportData } from './io.ts';
 import { getSettings } from './users.ts';
 
@@ -60,6 +61,7 @@ export function deleteBackup(userId: number, id: number) {
   if (!row) throw notFound('Backup not found');
   fs.rmSync(path.join(dir(userId), row.filename), { force: true });
   run('DELETE FROM backups WHERE id = ?', id);
+  forgetUpload(`${userId}/${row.filename}`);
 }
 
 function pruneAutomatic(userId: number) {
@@ -118,6 +120,6 @@ export function snapshotDatabase(): string | null {
   if (newest > now() - DAY_MS + 30 * 60_000) return null;
   const file = path.join(target, `magpie-${new Date().toISOString().replace(/[:.]/g, '-')}.db`);
   if (!snapshotDb(file)) return null;
-  pruneFiles(target, /^magpie-.*\.db$/, config.backupRetention);
+  for (const removed of pruneFiles(target, /^magpie-.*\.db$/, config.backupRetention)) forgetUpload(`database/${removed}`);
   return file;
 }

@@ -6,6 +6,7 @@ import { config } from './config.ts';
 import { closeDb, openDb } from './db/index.ts';
 import { pruneRateLimits, pruneSessions } from './lib/auth.ts';
 import { runScheduledBackups, snapshotDatabase } from './services/backups.ts';
+import { syncCloud } from './services/cloud.ts';
 import { startWorker } from './services/worker.ts';
 
 fs.mkdirSync(config.dataDir, { recursive: true });
@@ -26,6 +27,8 @@ function maintenance() {
   safely('rate-limits', pruneRateLimits);
   safely('backup', runScheduledBackups);
   safely('snapshot', snapshotDatabase);
+  // After both, so today's files are copied off the machine in the same pass. Also retries failed uploads.
+  safely('cloud', () => void syncCloud());
 }
 
 const hourly = setInterval(maintenance, 60 * 60_000);
